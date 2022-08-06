@@ -1,0 +1,7 @@
+name: RPGSTAT
+version: '${project.version}'
+main: rpgstat.RPGSTAT
+authors: [geenee10]
+
+commands:
+  stat:

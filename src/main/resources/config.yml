@@ -1,0 +1,168 @@
+######################################################################
+
+#key이름 수정 금지 (reset, statpoint 등)
+
+######################################################################
+reset:
+  type: "reset"
+  material: BLAZE_POWDER
+  name: "스텟 초기화"
+  color: e
+  lore:
+    itemlore:
+      - "&f에메랄드를 소요하여"
+      - "&f스텟을 &9&l초기화&r&f합니다."
+    statup:
+      - "&a소모 : 5,000EL"
+  position: 8
+######################################################################
+statpoint:
+  type: "statpoint"
+  material: BOOK
+  name: "보유스텟 : "
+  color: f
+  lore:
+    itemlore:
+      - "&7자신만의 스텟을 투자해 강해지세요 !"
+  position: 0
+######################################################################
+statinfo1:
+  type: "statinfo"
+  material: STAINED_GLASS_PANE
+  name: ""
+  color: f
+  itemcolor: 7
+  lore:
+    itemlore:
+      - ""
+  position: 1
+######################################################################
+statinfo2:
+  type: "statinfo"
+  material: STAINED_GLASS_PANE
+  name: ""
+  color: f
+  itemcolor: 7
+  lore:
+    itemlore:
+      - ""
+  position: 1
+######################################################################
+attack:
+  type: "stat"
+  material: IRON_SWORD
+  name: "공격력"
+  color: c
+  lore:
+    itemlore: "&a물리 / 마법 &f공격력 증가 스텟"
+    nowlevel:
+      - "현재 레벨: "
+    nowlevellore:
+      - "  공격력 - 100%"
+    nextlevel:
+      - "다음 레벨: "
+    nextlevellore:
+      - "  공격력 - 105%"
+    statup:
+      - "클릭 시 해당 스텟을 올립니다"
+  stat:
+    1: 1
+    2: 2
+    3: 3
+    4: 4
+    5: 5
+    6: 6
+    7: 7
+    8: 8
+    9: 9
+    10: 10
+  position: 2
+######################################################################
+patience:
+  type: "stat"
+  material: TOTEM
+  name: "인내"
+  color: 6
+  lore:
+    itemlore: "체력 / 마나 증가 스텟"
+    nowlevel:
+      - "현재 레벨: "
+    nowlevellore:
+      - "  체력 - 100%"
+      - "  마나 - 100%"
+    nextlevel:
+      - "다음 레벨: "
+    nextlevellore:
+      - "  체력 - 105%"
+      - "  마나 - 105%"
+    statup:
+      - "클릭 시 해당 스텟을 올립니다"
+  stat: 20, 20
+  position: 3
+######################################################################
+agility:
+  type: "stat"
+  material: FEATHER
+  name: "민첩"
+  color: b
+  lore:
+    itemlore: "&a이동속도 / 공격속도 &f증가 스텟"
+    nowlevel:
+      - "현재 레벨: "
+    nowlevellore:
+      - "  이동속도 - 100%"
+      - "  공격속도 - 100%"
+    nextlevel:
+      - "다음 레벨: "
+    nextlevellore:
+      - "  이동속도 - 101%"
+      - "  공격속도 - 103%"
+    statup:
+      - "클릭 시 해당 스텟을 올립니다"
+  stat:
+    1: 0.1, 2.5
+  position: 4
+######################################################################
+luck:
+  type: "stat"
+  material: NETHER_STAR
+  name: "행운"
+  color: a
+  lore:
+    itemlore: "&a회피 / 치명타 &f확률 증가 스텟"
+    nowlevel:
+      - "현재 레벨: "
+    nowlevellore:
+      - "  회피율 - 0%"
+      - "  치명타 - 5%"
+    nextlevel:
+      - "다음 레벨: "
+    nextlevellore:
+      - "  회피율 - 3%"
+      - "  치명타 - 7%"
+    statup:
+      - "클릭 시 해당 스텟을 올립니다"
+  stat: 0, 4
+  position: 5
+######################################################################
+proficiency:
+  type: "stat"
+  material: EXP_BOTTLE
+  name: "숙련도"
+  color: e
+  lore:
+    itemlore: "&5경험치 획득 &f확률 증가 스텟"
+    nowlevel:
+      - "현재 레벨: "
+    nowlevellore:
+      - "  회피율 - 0%"
+      - "  치명타 - 5%"
+    nextlevel:
+      - "다음 레벨: "
+    nextlevellore:
+      - "  회피율 - 3%"
+      - "  치명타 - 7%"
+    statup:
+      - "클릭 시 해당 스텟을 올립니다"
+  stat: 1
+  position: 6
