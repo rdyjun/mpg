@@ -33,11 +33,10 @@ public class RPGSTAT extends JavaPlugin implements Listener {
     public void onEnable() {
         Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + "스텟 플러그인이 활성화되었습니다");
         Bukkit.getPluginManager().registerEvents(this, this);
-        saveDefaultConfig();
         if(!getDataFolder().exists()){
             getDataFolder().mkdirs();
         }
-        this.playerData = new playerData(this);
+        saveDefaultConfig();
     }
     //플러그인 비활성화
     @Override
@@ -57,7 +56,8 @@ public class RPGSTAT extends JavaPlugin implements Listener {
     @EventHandler
     public void newPlayer(PlayerJoinEvent e){
         Player p = (Player) e.getPlayer();
-        playerData.newPlayer(e.getPlayer());
+        this.playerData = new playerData(this, "playerdata/" + p.getUniqueId());
+        playerData.newPlayer(e.getPlayer(), this);
         playerData.save();
     }
     public ItemStack StatInformation(Player p, String ItemName){

@@ -1,10 +1,13 @@
 package files;
 
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import rpgstat.RPGSTAT;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
+
+import java.util.Iterator;
 
 public class playerData extends playerFile {
 
@@ -16,27 +19,26 @@ public class playerData extends playerFile {
     String statpoint = "statpoint";
 
 
-    public playerData(RPGSTAT main){
-        super(main, "Playerdata.yml");
+    public playerData(RPGSTAT main, String playerName){
+        super(main, playerName);
     }
 
     private playerData playerData;
+    private RPGSTAT RPGSTAT;
 
-    public void newPlayer(Player p){
-        String ID = p.getUniqueId().toString();
-        if(!config.contains(ID)) {
-            for(Object s : config.getKeys(false)){
-                if(config.get(s + ".type") == "stat"){
-                    config.set(ID + "." + String.valueOf(s), 1);
-                }
-            }
-            config.set(ID + "." + this.attack, 1);
-            config.set(ID + "." + this.patience, 1);
-            config.set(ID + "." + this.luck, 1);
-            config.set(ID + "." + this.proficiency, 1);
-            config.set(ID + "." + this.agility, 1);
-            config.set(ID + "." + this.statpoint, 0);
+    public void newPlayer(Player p, Plugin plugin){
+        String pID = p.getUniqueId().toString();
+        if(plugin.getConfig().contains("statpoint")){
+            Bukkit.getConsoleSender().sendMessage("-----------------------------------------------");
+            Bukkit.getConsoleSender().sendMessage("file get null");
+            Bukkit.getConsoleSender().sendMessage("-----------------------------------------------");
+            newPlayer(p, plugin);
+        } else {
+            Bukkit.getConsoleSender().sendMessage("-----------------------------------------------");
+            Bukkit.getConsoleSender().sendMessage(String.valueOf(plugin.getConfig().getConfigurationSection("stats").getKeys(false)));
+            Bukkit.getConsoleSender().sendMessage("-----------------------------------------------");
         }
+
     }
     public void statUp(Player p, String stat, Plugin plugin){
         String pID = p.getUniqueId().toString();
