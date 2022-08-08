@@ -11,6 +11,7 @@ import org.bukkit.entity.Player;
 import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.UUID;
 
 public class playerData extends playerFile {
     private playerData playerData;
@@ -24,26 +25,24 @@ public class playerData extends playerFile {
 
     public void newPlayer(Player p){
         String pID = p.getUniqueId().toString();
-        Bukkit.getConsoleSender().sendMessage("----------------생성-------------------");
         for(String a : RPGSTAT.getConfig().getConfigurationSection("stats").getKeys(false)){
             config.set(pID + "." + a, 1);
         }
-        Bukkit.getConsoleSender().sendMessage("----------------스텟포인트-------------------");
         config.set(pID + ".statpoint", 0);
+        save();
     }
-    public void statUp(Player p, String stat){
-        String pID = p.getUniqueId().toString();
+    public void statUp(Player p, String stat) throws IOException {
+        UUID pID = p.getUniqueId();
 
-        //플레이어 파일 생성
         File pf = new File(RPGSTAT.getDataFolder(),"playerdata/" + p.getUniqueId() + ".yml");
         FileConfiguration pFile = YamlConfiguration.loadConfiguration(pf);
-
-        int playerStat = (int)pFile.get(pID + "." + stat);
-        p.sendMessage(String.valueOf(playerStat));
-        if((Integer)pFile.get("statpoint") > 0){
-            pFile.set(stat, playerStat + 1);
-            pFile.set("statpoint", (Integer)pFile.get("statpoint") - 1);
-            p.sendMessage(ChatColor.BOLD + "" + ChatColor.DARK_GREEN + "[" + ChatColor.GREEN + "STAT" + ChatColor.DARK_GREEN + "] " + ChatColor.getByChar(String.valueOf(RPGSTAT.getConfig().get(stat + "." + "color"))) + RPGSTAT.getConfig().get(stat + ".name") + ChatColor.RESET + "" + ChatColor.WHITE + (playerStat - 1) + " -> " + playerStat + " 스텟 상승!");
+        if(pFile.getInt(pID + ".statpoint") > 0){
+            if(pFile.getInt(pID + "." + stat) < 100){
+                pFile.set(pID + "." + stat, pFile.getInt(pID + "." + stat) + 1);
+                pFile.set(pID + "." + "statpoint", pFile.getInt(pID + ".statpoint") - 1);
+                p.sendMessage(ChatColor.BOLD + "" + ChatColor.DARK_GREEN + "[" + ChatColor.GREEN + "STAT" + ChatColor.DARK_GREEN + "] " + ChatColor.getByChar(String.valueOf(RPGSTAT.getConfig().get("stats." + stat + "." + "color"))) + RPGSTAT.getConfig().get("stats." + stat + ".name") + ChatColor.RESET + " " + ChatColor.WHITE + (pFile.getInt(pID + "." + stat) - 1) + " -> " + pFile.getInt(pID + "." + stat) + " 스텟 상승!");
+            }
         }
+        pFile.save(pf);
     }
 }

@@ -53,24 +53,22 @@ public class RPGSTAT extends JavaPlugin implements Listener {
     @EventHandler
     public void onLevelUp(PlayerExpChangeEvent e) throws IOException {
         Player p = e.getPlayer();
-
+        UUID pID = p.getUniqueId();
         //플레이어 파일 생성
         File pf = new File(getDataFolder(),"playerdata/" + p.getUniqueId() + ".yml");
         FileConfiguration pFile = YamlConfiguration.loadConfiguration(pf);
 
-        pFile.set("statpoint", (Integer)pFile.get(p.getUniqueId() + "." + "statpoint") + 1);
-        savePlayerConfig(p);
-        p.sendMessage(String.valueOf(pFile.get(p.getUniqueId() + "." + "statpoint")));
-        p.sendMessage(ChatColor.BOLD + "" + ChatColor.DARK_GREEN + "[" + ChatColor.GREEN + "STAT" + ChatColor.DARK_GREEN + "]" + ChatColor.RESET + "" + ChatColor.WHITE + "레벨업! 현재 " + p.getLevel() + "레벨 입니다 !");
+        pFile.set(pID + ".statpoint", pFile.getInt(p.getUniqueId() + "." + "statpoint") + 1);
+        pFile.save(pf);
+        p.sendMessage(ChatColor.BOLD + "" + ChatColor.DARK_GREEN + "[" + ChatColor.GREEN + "STAT" + ChatColor.DARK_GREEN + "] " + ChatColor.RESET + "" + ChatColor.WHITE + "레벨업! 현재 " + p.getLevel() + "레벨 입니다 !");
+        p.sendMessage(ChatColor.BOLD + "" + ChatColor.DARK_GREEN + "[" + ChatColor.GREEN + "STAT" + ChatColor.DARK_GREEN + "] " + ChatColor.RESET + "" + ChatColor.WHITE + "보유 스텟 : " + pFile.get(pID + ".statpoint"));
     }
     //처음 접속했을 때
     @EventHandler
-    public void newPlayer(PlayerJoinEvent e) throws IOException {
+    public void newPlayer(PlayerJoinEvent e){
         Player p = e.getPlayer();
-
         this.playerData = new playerData(this, "playerdata/" + p.getUniqueId() + ".yml");
         playerData.newPlayer(p);
-        savePlayerConfig(p);
     }
     public ItemStack StatInformation(Player p, String ItemName){
         File pf = new File(getDataFolder(),"playerdata/" + p.getUniqueId() + ".yml");
@@ -108,7 +106,7 @@ public class RPGSTAT extends JavaPlugin implements Listener {
                 if((Integer)(pFile.get(p.getUniqueId() + "." + ItemName)) < (Integer)getConfig().get("setting.max")) {
                     lore.add(ChatColor.GRAY + s);
                 } else {
-                    lore.add(ChatColor.GRAY + "마지막 레벨입니다.");
+                    lore.add(ChatColor.GRAY + "  마지막 레벨입니다.");
                 }
             }
             //공백
@@ -224,27 +222,16 @@ public class RPGSTAT extends JavaPlugin implements Listener {
         }
         //클릭한 아이템에 따른 작동
         e.setCancelled(true);
-        if(e.getCurrentItem().getItemMeta().getDisplayName() == StatInformation(p, "statreset").getItemMeta().getDisplayName()){
-            p.sendMessage("누름");
-        } else {
-            for(String a : getConfig().getConfigurationSection("stats").getKeys(false)){
-                if(e.getCurrentItem().getItemMeta().getDisplayName() == getConfig().get(a + ".name")){
-                    playerData.statUp(p, a);
-                    p.openInventory(inv(p));
-                }
+        for(String a : getConfig().getConfigurationSection("stats").getKeys(false)){
+            if(e.getCurrentItem().getItemMeta().getDisplayName().contains(String.valueOf(getConfig().get("stats." + a + ".name")))){
+                playerData.statUp(p, a);
+                p.openInventory(inv(p));
             }
         }
-        savePlayerConfig(p);
-        p.performCommand("stat");
     }
     public FileConfiguration getPlayerFile(Player p){
         File pf = new File(getDataFolder(),"playerdata/" + p.getUniqueId() + ".yml");
         FileConfiguration pFile = YamlConfiguration.loadConfiguration(pf);
         return pFile;
-    }
-    public void savePlayerConfig(Player p) throws IOException {
-        File pf = new File(getDataFolder(),"playerdata/" + p.getUniqueId() + ".yml");
-        FileConfiguration pFile = YamlConfiguration.loadConfiguration(pf);
-        pFile.save(pf);
     }
 }
