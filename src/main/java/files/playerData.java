@@ -1,56 +1,49 @@
 package files;
 
 import org.bukkit.Bukkit;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
 import rpgstat.RPGSTAT;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Iterator;
 
 public class playerData extends playerFile {
-
-    String attack = "attack";
-    String patience = "patience";
-    String luck = "luck";
-    String proficiency = "proficiency";
-    String agility = "agility";
-    String statpoint = "statpoint";
-
-
-    public playerData(RPGSTAT main, String playerName){
-        super(main, playerName);
-    }
-
     private playerData playerData;
     private RPGSTAT RPGSTAT;
-
-    public void newPlayer(Player p, Plugin plugin){
-        String pID = p.getUniqueId().toString();
-        if(plugin.getConfig().contains("statpoint")){
-            Bukkit.getConsoleSender().sendMessage("-----------------------------------------------");
-            Bukkit.getConsoleSender().sendMessage("file get null");
-            Bukkit.getConsoleSender().sendMessage("-----------------------------------------------");
-            newPlayer(p, plugin);
-        } else {
-            Bukkit.getConsoleSender().sendMessage("-----------------------------------------------");
-            Bukkit.getConsoleSender().sendMessage(String.valueOf(plugin.getConfig().getConfigurationSection("stats").getKeys(false)));
-            Bukkit.getConsoleSender().sendMessage("-----------------------------------------------");
-        }
-
+    public playerData(RPGSTAT main, String playerName){
+        super(main, playerName);
+        this.RPGSTAT = main;
     }
-    public void statUp(Player p, String stat, Plugin plugin){
-        String pID = p.getUniqueId().toString();
-        int playerStat = (int)config.get(pID + "." + stat);
 
-        if((Integer)config.get(pID + "." + "statpoint") > 0){
-            config.set(pID + "." + stat, playerStat + 1);
-            config.set(pID + "." + "statpoint", (Integer)config.get(pID + "." + "statpoint") - 1);
-            p.sendMessage(ChatColor.BOLD + "" + ChatColor.DARK_GREEN + "[" + ChatColor.GREEN + "STAT" + ChatColor.DARK_GREEN + "] " + ChatColor.getByChar(String.valueOf(plugin.getConfig().get(stat + "." + "color"))) + plugin.getConfig().get(stat + ".name") + ChatColor.RESET + "" + ChatColor.WHITE + (playerStat - 1) + " -> " + playerStat + " 스텟 상승!");
+
+
+    public void newPlayer(Player p){
+        String pID = p.getUniqueId().toString();
+        Bukkit.getConsoleSender().sendMessage("----------------생성-------------------");
+        for(String a : RPGSTAT.getConfig().getConfigurationSection("stats").getKeys(false)){
+            config.set(pID + "." + a, 1);
         }
+        Bukkit.getConsoleSender().sendMessage("----------------스텟포인트-------------------");
+        config.set(pID + ".statpoint", 0);
     }
-    public FileConfiguration getUserDataConfig (){
-        return this.config;
+    public void statUp(Player p, String stat){
+        String pID = p.getUniqueId().toString();
+
+        //플레이어 파일 생성
+        File pf = new File(RPGSTAT.getDataFolder(),"playerdata/" + p.getUniqueId() + ".yml");
+        FileConfiguration pFile = YamlConfiguration.loadConfiguration(pf);
+
+        int playerStat = (int)pFile.get(pID + "." + stat);
+        p.sendMessage(String.valueOf(playerStat));
+        if((Integer)pFile.get("statpoint") > 0){
+            pFile.set(stat, playerStat + 1);
+            pFile.set("statpoint", (Integer)pFile.get("statpoint") - 1);
+            p.sendMessage(ChatColor.BOLD + "" + ChatColor.DARK_GREEN + "[" + ChatColor.GREEN + "STAT" + ChatColor.DARK_GREEN + "] " + ChatColor.getByChar(String.valueOf(RPGSTAT.getConfig().get(stat + "." + "color"))) + RPGSTAT.getConfig().get(stat + ".name") + ChatColor.RESET + "" + ChatColor.WHITE + (playerStat - 1) + " -> " + playerStat + " 스텟 상승!");
+        }
     }
 }
