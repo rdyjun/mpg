@@ -1,12 +1,12 @@
 package rpgstat;
 
-import files.playerFile;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -20,7 +20,10 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import files.playerData;
+
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.*;
 
 
@@ -37,63 +40,97 @@ public class RPGSTAT extends JavaPlugin implements Listener {
             getDataFolder().mkdirs();
         }
         saveDefaultConfig();
+
     }
     //플러그인 비활성화
     @Override
     public void onDisable() {
         Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "스텟 플러그인이 비활성화되었습니다");
-        playerData.save();
+        saveConfig();
     }
+
     //레벨업 했을 때
     @EventHandler
-    public void onLevelUp(PlayerExpChangeEvent e) throws FileNotFoundException {
-        Player p = (Player) e.getPlayer();
-        playerData.getUserDataConfig().set(p.getUniqueId() + "." + "statpoint", (Integer)playerData.getUserDataConfig().get(p.getUniqueId() + "." + "statpoint") + 1);
-        playerData.save();
+    public void onLevelUp(PlayerExpChangeEvent e) throws IOException {
+        Player p = e.getPlayer();
+
+        //플레이어 파일 생성
+        File pf = new File(getDataFolder(),"playerdata/" + p.getUniqueId() + ".yml");
+        FileConfiguration pFile = YamlConfiguration.loadConfiguration(pf);
+
+        pFile.set("statpoint", (Integer)pFile.get(p.getUniqueId() + "." + "statpoint") + 1);
+        savePlayerConfig(p);
+        p.sendMessage(String.valueOf(pFile.get(p.getUniqueId() + "." + "statpoint")));
         p.sendMessage(ChatColor.BOLD + "" + ChatColor.DARK_GREEN + "[" + ChatColor.GREEN + "STAT" + ChatColor.DARK_GREEN + "]" + ChatColor.RESET + "" + ChatColor.WHITE + "레벨업! 현재 " + p.getLevel() + "레벨 입니다 !");
     }
     //처음 접속했을 때
     @EventHandler
-    public void newPlayer(PlayerJoinEvent e){
-        Player p = (Player) e.getPlayer();
-        this.playerData = new playerData(this, "playerdata/" + p.getUniqueId());
-        playerData.newPlayer(e.getPlayer(), this);
-        playerData.save();
+    public void newPlayer(PlayerJoinEvent e) throws IOException {
+        Player p = e.getPlayer();
+
+        this.playerData = new playerData(this, "playerdata/" + p.getUniqueId() + ".yml");
+        playerData.newPlayer(p);
+        savePlayerConfig(p);
     }
     public ItemStack StatInformation(Player p, String ItemName){
-        Material material = Material.matchMaterial(String.valueOf(getConfig().get(ItemName + "." + "material")));
-        ChatColor chatColor = ChatColor.getByChar(String.valueOf(getConfig().get(ItemName + "." + "color")));
-        String statName = String.valueOf(getConfig().get(ItemName + "." + "name"));
+        File pf = new File(getDataFolder(),"playerdata/" + p.getUniqueId() + ".yml");
+        FileConfiguration pFile = YamlConfiguration.loadConfiguration(pf);
+        String head;
+
+        if(getConfig().contains("stats." + ItemName)){
+            head = "stats";
+        } else {
+            head = "info";
+        }
+        Material material = Material.matchMaterial(String.valueOf(getConfig().get(head + "." + ItemName + "." + "material")));
+        ChatColor chatColor = ChatColor.getByChar(String.valueOf(getConfig().get(head + "." + ItemName + "." + "color")));
+        String statName = String.valueOf(getConfig().get(head + "." + ItemName + "." + "name"));
         //LORE 영역
         List<String> lore = new ArrayList<>();
-        for(String s : getConfig().getStringList(ItemName + "." + "lore" + "." + "itemlore")){
+        for(String s : getConfig().getStringList(head + "." + ItemName + "." + "lore" + "." + "itemlore")){
             lore.add(ChatColor.BOLD + "" + ChatColor.translateAlternateColorCodes('&', s));
         }
-        for(String s : getConfig().getStringList(ItemName + "." + "lore" + "." + "nowlevel")){
-            lore.add(ChatColor.GOLD + s + playerData.getUserDataConfig().get(p.getUniqueId() + "." + ItemName));
+        if(head == "stats"){
+            //현재 레벨
+            lore.add(ChatColor.GOLD + "현재 레벨 : " + pFile.get(p.getUniqueId() + "." + ItemName));
+            //현재 레벨 설명
+            for(String s : getConfig().getStringList(head + "." + ItemName + "." + "lore" + "." + "nowlevellore")){
+                lore.add(ChatColor.WHITE + s);
+            }
+            //다음 레벨
+            if((Integer)(pFile.get(p.getUniqueId() + "." + ItemName)) < (Integer)getConfig().get("setting.max")){
+                lore.add(ChatColor.DARK_PURPLE + "다음 레벨 : " + ((Integer)(pFile.get(p.getUniqueId() + "." + ItemName)) + 1));
+            } else {
+                lore.add(ChatColor.DARK_PURPLE + "다음 레벨 : MAX");
+            }
+            //다음 레벨 설명
+            for(String s : getConfig().getStringList(head + "." + ItemName + "." + "lore" + "." + "nextlevellore")){
+                if((Integer)(pFile.get(p.getUniqueId() + "." + ItemName)) < (Integer)getConfig().get("setting.max")) {
+                    lore.add(ChatColor.GRAY + s);
+                } else {
+                    lore.add(ChatColor.GRAY + "마지막 레벨입니다.");
+                }
+            }
+            //공백
+            lore.add(" ");
+            //버튼 힌트
+            for(String s : getConfig().getStringList(head + "." + ItemName + "." + "lore" + "." + "statup")){
+                if((Integer)(pFile.get(p.getUniqueId() + "." + ItemName)) < (Integer)getConfig().get("setting.max")) {
+                    lore.add(ChatColor.DARK_GRAY + s);
+                } else {
+                    lore.add(ChatColor.DARK_GRAY + "더 이상 이 스텟 레벨을 올릴 수 없습니다.");
+                }
+            }
         }
-        for(String s : getConfig().getStringList(ItemName + "." + "lore" + "." + "nowlevellore")){
-            lore.add(ChatColor.WHITE + s);
-        }
-
-        for(String s : getConfig().getStringList(ItemName + "." + "lore" + "." + "nextlevel")){
-            lore.add(ChatColor.DARK_PURPLE + s);
-        }
-        for(String s : getConfig().getStringList(ItemName + "." + "lore" + "." + "nextlevellore")){
-            lore.add(ChatColor.GRAY + s);
-        }
-        lore.add(" ");
-        for(String s : getConfig().getStringList(ItemName + "." + "lore" + "." + "statup")){
-            lore.add(ChatColor.DARK_GRAY + s);
-        }
-
+        //아이템 선언
         ItemStack stat;
+        //스텟포인트 아이템이라면 갯수 지정
         if(ItemName == "statpoint"){
             int n;
-            if((Integer) playerData.getUserDataConfig().get(p.getUniqueId() + "." + "statpoint") <= 0){
+            if((Integer) pFile.get(p.getUniqueId() + ".statpoint") <= 0){
                 n = 1;
             } else {
-                n = (Integer) playerData.getUserDataConfig().get(p.getUniqueId() + "." + "statpoint");
+                n = (Integer) pFile.get(p.getUniqueId() + ".statpoint");
             }
             stat = new ItemStack(material, n);
         } else if(String.valueOf(material) == "STAINED_GLASS_PANE"){
@@ -101,9 +138,11 @@ public class RPGSTAT extends JavaPlugin implements Listener {
         } else {
             stat = new ItemStack(material);
         }
+
         ItemMeta statMeta = stat.getItemMeta();
+
         if(ItemName == "statpoint"){
-            statMeta.setDisplayName(chatColor + "" + ChatColor.BOLD + statName + playerData.getUserDataConfig().get(p.getUniqueId() + "." + "statpoint"));
+            statMeta.setDisplayName(chatColor + "" + ChatColor.BOLD + statName + pFile.get(p.getUniqueId() + ".statpoint"));
         } else {
             statMeta.setDisplayName(chatColor + "" + ChatColor.BOLD + statName);
         }
@@ -177,7 +216,7 @@ public class RPGSTAT extends JavaPlugin implements Listener {
     }
     //스텟 창 내 버튼 기능
     @EventHandler
-    public void ivClick(InventoryClickEvent e) {
+    public void ivClick(InventoryClickEvent e) throws IOException {
         Player p = (Player) e.getWhoClicked();
         //열려있는(스텟) 인벤토리
         if(!e.getView().getTitle().contains("스텟")){
@@ -185,33 +224,27 @@ public class RPGSTAT extends JavaPlugin implements Listener {
         }
         //클릭한 아이템에 따른 작동
         e.setCancelled(true);
-
-        if(e.getCurrentItem().getType() == StatInformation(p, "attack").getType()){
-            playerData.statUp(p, "attack", this);
-            p.openInventory(inv(p));
-        } else
-        if(e.getCurrentItem().getType() == StatInformation(p, "patience").getType()){
-            playerData.statUp(p, "patience", this);
-            p.openInventory(inv(p));
-        } else
-        if(e.getCurrentItem().getType() == StatInformation(p, "agility").getType()){
-            playerData.statUp(p, "agility", this);
-            p.openInventory(inv(p));
-        } else
-        if(e.getCurrentItem().getType() == StatInformation(p, "luck").getType()){
-            playerData.statUp(p, "luck",this);
-        } else
-        if(e.getCurrentItem().getType() == StatInformation(p, "proficiency").getType()){
-            playerData.statUp(p, "proficiency", this);
+        if(e.getCurrentItem().getItemMeta().getDisplayName() == StatInformation(p, "statreset").getItemMeta().getDisplayName()){
+            p.sendMessage("누름");
+        } else {
+            for(String a : getConfig().getConfigurationSection("stats").getKeys(false)){
+                if(e.getCurrentItem().getItemMeta().getDisplayName() == getConfig().get(a + ".name")){
+                    playerData.statUp(p, a);
+                    p.openInventory(inv(p));
+                }
+            }
         }
-        if(e.getCurrentItem().getType() == StatInformation(p, "statreset").getType()){
-
-        }
-        playerData.save();
+        savePlayerConfig(p);
         p.performCommand("stat");
     }
-
-    public FileConfiguration getItemDataConfig (){
-        return getConfig();
+    public FileConfiguration getPlayerFile(Player p){
+        File pf = new File(getDataFolder(),"playerdata/" + p.getUniqueId() + ".yml");
+        FileConfiguration pFile = YamlConfiguration.loadConfiguration(pf);
+        return pFile;
+    }
+    public void savePlayerConfig(Player p) throws IOException {
+        File pf = new File(getDataFolder(),"playerdata/" + p.getUniqueId() + ".yml");
+        FileConfiguration pFile = YamlConfiguration.loadConfiguration(pf);
+        pFile.save(pf);
     }
 }
