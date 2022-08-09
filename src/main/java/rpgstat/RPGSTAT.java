@@ -53,21 +53,33 @@ public class RPGSTAT extends JavaPlugin implements Listener {
     @EventHandler
     public void onLevelUp(PlayerExpChangeEvent e) throws IOException {
         Player p = e.getPlayer();
-        UUID pID = p.getUniqueId();
         //플레이어 파일 생성
-        File pf = new File(getDataFolder(),"playerdata/" + p.getUniqueId() + ".yml");
+        File pf = new File(getDataFolder(), "playerdata/" + p.getUniqueId() + ".yml");
         FileConfiguration pFile = YamlConfiguration.loadConfiguration(pf);
+        if(p.getExpToLevel() <= e.getAmount()) {
+            UUID pID = p.getUniqueId();
 
-        pFile.set(pID + ".statpoint", pFile.getInt(p.getUniqueId() + "." + "statpoint") + 1);
-        pFile.save(pf);
-        p.sendMessage(ChatColor.BOLD + "" + ChatColor.DARK_GREEN + "[" + ChatColor.GREEN + "STAT" + ChatColor.DARK_GREEN + "] " + ChatColor.RESET + "" + ChatColor.WHITE + "레벨업! 현재 " + p.getLevel() + "레벨 입니다 !");
-        p.sendMessage(ChatColor.BOLD + "" + ChatColor.DARK_GREEN + "[" + ChatColor.GREEN + "STAT" + ChatColor.DARK_GREEN + "] " + ChatColor.RESET + "" + ChatColor.WHITE + "보유 스텟 : " + pFile.get(pID + ".statpoint"));
+            pFile.set(pID + ".statpoint", pFile.getInt(p.getUniqueId() + "." + "statpoint") + 1);
+            pFile.save(pf);
+            p.sendMessage(ChatColor.BOLD + "" + ChatColor.DARK_GREEN + "[" + ChatColor.GREEN + "STAT" + ChatColor.DARK_GREEN + "] " + ChatColor.RESET + "" + ChatColor.WHITE + "레벨업! 현재 " + p.getLevel() + "레벨 입니다 !");
+            p.sendMessage(ChatColor.BOLD + "" + ChatColor.DARK_GREEN + "[" + ChatColor.GREEN + "STAT" + ChatColor.DARK_GREEN + "] " + ChatColor.RESET + "" + ChatColor.WHITE + "보유 스텟 : " + pFile.get(pID + ".statpoint"));
+        } else {
+            for(String a : pFile.getConfigurationSection("stats").getKeys(false)){
+                pFile.set(p.getUniqueId() + "." + a, 1);
+                pFile.set(p.getUniqueId() + ".statpoint", p.getLevel());
+            }
+        }
     }
     //처음 접속했을 때
     @EventHandler
     public void newPlayer(PlayerJoinEvent e){
         Player p = e.getPlayer();
-        this.playerData = new playerData(this, "playerdata/" + p.getUniqueId() + ".yml");
+//플레이어 파일 생성
+        File pf = new File(getDataFolder(), "playerdata/" + p.getUniqueId() + ".yml");
+        if(!pf.exists()){
+            this.playerData = new playerData(this, "playerdata/" + p.getUniqueId() + ".yml");
+        }
+
         playerData.newPlayer(p);
     }
     public ItemStack StatInformation(Player p, String ItemName){
@@ -228,10 +240,5 @@ public class RPGSTAT extends JavaPlugin implements Listener {
                 p.openInventory(inv(p));
             }
         }
-    }
-    public FileConfiguration getPlayerFile(Player p){
-        File pf = new File(getDataFolder(),"playerdata/" + p.getUniqueId() + ".yml");
-        FileConfiguration pFile = YamlConfiguration.loadConfiguration(pf);
-        return pFile;
     }
 }
