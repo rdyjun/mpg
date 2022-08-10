@@ -22,11 +22,13 @@ info:
   statpoint:
     type: "statpoint"
     material: BOOK
-    name: "보유스텟 : "
+    name: "보유스텟"
     color: f
     lore:
       itemlore:
-        - "&7자신만의 스텟을 투자해 강해지세요 !"
+        - "&7자신만의         "
+        - "&7스텟 투자로      "
+        - "&7강해지세요 !     "
     position: 0
 
   statinfo1:
@@ -49,7 +51,7 @@ info:
     lore:
       itemlore:
         - ""
-    position: 1
+    position: 7
 
 
 stats:

@@ -22,7 +22,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import files.playerData;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.*;
 
@@ -83,8 +82,6 @@ public class RPGSTAT extends JavaPlugin implements Listener {
 
     }
     public ItemStack StatInformation(Player p, String ItemName){
-        File pf = new File(getDataFolder(),"playerdata/" + p.getUniqueId() + ".yml");
-        FileConfiguration pFile = YamlConfiguration.loadConfiguration(pf);
         String head;
 
         if(getConfig().contains("stats." + ItemName)){
@@ -97,25 +94,26 @@ public class RPGSTAT extends JavaPlugin implements Listener {
         String statName = String.valueOf(getConfig().get(head + "." + ItemName + "." + "name"));
         //LORE 영역
         List<String> lore = new ArrayList<>();
+        //기본 아이템 설명
         for(String s : getConfig().getStringList(head + "." + ItemName + "." + "lore" + "." + "itemlore")){
             lore.add(ChatColor.BOLD + "" + ChatColor.translateAlternateColorCodes('&', s));
         }
         if(head == "stats"){
             //현재 레벨
-            lore.add(ChatColor.GOLD + "현재 레벨 : " + pFile.get(p.getUniqueId() + "." + ItemName));
+            lore.add(ChatColor.GOLD + "현재 레벨 : " + getPlayerFile(p, ItemName));
             //현재 레벨 설명
             for(String s : getConfig().getStringList(head + "." + ItemName + "." + "lore" + "." + "nowlevellore")){
                 lore.add(ChatColor.WHITE + s);
             }
             //다음 레벨
-            if((Integer)(pFile.get(p.getUniqueId() + "." + ItemName)) < (Integer)getConfig().get("setting.max")){
-                lore.add(ChatColor.DARK_PURPLE + "다음 레벨 : " + ((Integer)(pFile.get(p.getUniqueId() + "." + ItemName)) + 1));
+            if((Integer)(getPlayerFile(p, ItemName)) < (Integer)getConfig().get("setting.max")){
+                lore.add(ChatColor.DARK_PURPLE + "다음 레벨 : " + ((Integer)(getPlayerFile(p, ItemName)) + 1));
             } else {
                 lore.add(ChatColor.DARK_PURPLE + "다음 레벨 : MAX");
             }
             //다음 레벨 설명
             for(String s : getConfig().getStringList(head + "." + ItemName + "." + "lore" + "." + "nextlevellore")){
-                if((Integer)(pFile.get(p.getUniqueId() + "." + ItemName)) < (Integer)getConfig().get("setting.max")) {
+                if((Integer)(getPlayerFile(p, ItemName)) < (Integer)getConfig().get("setting.max")) {
                     lore.add(ChatColor.GRAY + s);
                 } else {
                     lore.add(ChatColor.GRAY + "  마지막 레벨입니다.");
@@ -125,7 +123,7 @@ public class RPGSTAT extends JavaPlugin implements Listener {
             lore.add(" ");
             //버튼 힌트
             for(String s : getConfig().getStringList(head + "." + ItemName + "." + "lore" + "." + "statup")){
-                if((Integer)(pFile.get(p.getUniqueId() + "." + ItemName)) < (Integer)getConfig().get("setting.max")) {
+                if((Integer)(getPlayerFile(p, ItemName)) < (Integer)getConfig().get("setting.max")) {
                     lore.add(ChatColor.DARK_GRAY + s);
                 } else {
                     lore.add(ChatColor.DARK_GRAY + "더 이상 이 스텟 레벨을 올릴 수 없습니다.");
@@ -134,26 +132,27 @@ public class RPGSTAT extends JavaPlugin implements Listener {
         }
         //아이템 선언
         ItemStack stat;
-        //스텟포인트 아이템이라면 갯수 지정
-        if(ItemName == "statpoint"){
+        //아이템 수량 지정
+        if(ItemName.equalsIgnoreCase("statpoint")){
             int n;
-            if((Integer) pFile.get(p.getUniqueId() + ".statpoint") <= 0){
+            if((Integer) getPlayerFile(p, "statpoint") <= 0){
                 n = 1;
             } else {
-                n = (Integer) pFile.get(p.getUniqueId() + ".statpoint");
+                n = (Integer) getPlayerFile(p, "statpoint");
             }
             stat = new ItemStack(material, n);
-        } else if(String.valueOf(material) == "STAINED_GLASS_PANE"){
+        } else if(material == Material.getMaterial("STAINED_GLASS_PANE")){
             stat = new ItemStack(material, 1, (short) 7);
         } else {
             stat = new ItemStack(material);
         }
 
         ItemMeta statMeta = stat.getItemMeta();
-
-        if(ItemName == "statpoint"){
-            statMeta.setDisplayName(chatColor + "" + ChatColor.BOLD + statName + pFile.get(p.getUniqueId() + ".statpoint"));
+        //아이템 이름
+        if(ItemName.equalsIgnoreCase("statpoint")){
+            statMeta.setDisplayName(chatColor + "" + ChatColor.BOLD + statName + " : " + getPlayerFile(p, "statpoint"));
         } else {
+            p.sendMessage(ItemName);
             statMeta.setDisplayName(chatColor + "" + ChatColor.BOLD + statName);
         }
         statMeta.setLore(lore);
@@ -162,18 +161,16 @@ public class RPGSTAT extends JavaPlugin implements Listener {
 
         return stat;
     }
+    //스텟창 설정 ----------------------------
     public Inventory inv(Player p){
         //스텟 메뉴 틀
         Inventory inv = Bukkit.createInventory(null, 9, "스텟");
-        inv.setItem(0, StatInformation(p, "statpoint"));
-        inv.setItem(1, StatInformation(p, "statinfo1"));
-        inv.setItem(2, StatInformation(p, "attack"));
-        inv.setItem(3, StatInformation(p, "patience"));
-        inv.setItem(4, StatInformation(p, "agility"));
-        inv.setItem(5, StatInformation(p, "luck"));
-        inv.setItem(6, StatInformation(p, "proficiency"));
-        inv.setItem(7, StatInformation(p, "statinfo2"));
-        inv.setItem(8, StatInformation(p, "reset"));
+        for(String s : getConfig().getConfigurationSection("info").getKeys(false)){
+            inv.setItem(getConfig().getInt("info." + s + ".position"), StatInformation(p, s));
+        }
+        for(String s : getConfig().getConfigurationSection("stats").getKeys(false)){
+            inv.setItem(getConfig().getInt("stats." + s + ".position"), StatInformation(p, s));
+        }
         p.openInventory(inv);
         return inv;
     }
@@ -187,94 +184,71 @@ public class RPGSTAT extends JavaPlugin implements Listener {
                 } else if(p.isOp()){
                     if(args.length == 1){
                         if(args[0].equalsIgnoreCase("admin")){
-                            p.sendMessage(logo() + ChatColor.WHITE + "/stat reset [플레이어] " + ChatColor.GREEN + "플레이어의 스텟을 초기화한다. " + ChatColor.GRAY + "(레벨 0)");
-                            p.sendMessage(logo() + ChatColor.WHITE + "/stat set [플레이어] [레벨] " + ChatColor.GREEN + "플레이어의 레벨을 임의로 지정합니다. " + ChatColor.GRAY + "(스텟은 초기화)");
+                            p.sendMessage(messageHead() + ChatColor.WHITE + "/stat reset [플레이어] " + ChatColor.GREEN + "플레이어의 스텟을 초기화한다. " + ChatColor.GRAY + "(레벨 0)");
+                            p.sendMessage(messageHead() + ChatColor.WHITE + "/stat set [플레이어] [레벨] " + ChatColor.GREEN + "플레이어의 레벨을 임의로 지정합니다. " + ChatColor.GRAY + "(스텟은 초기화)");
                         } else if(args[0].equalsIgnoreCase("reset")){
-                            p.sendMessage(logo() + ChatColor.RED + "명령어가 올바르지 않습니다 !");
-                            p.sendMessage(logo() + ChatColor.WHITE + "/stat reset [플레이어] " + ChatColor.GREEN + "플레이어의 스텟을 초기화한다. " + ChatColor.GRAY + "(레벨 0)");
+                            p.sendMessage(messageHead() + ChatColor.RED + "명령어가 올바르지 않습니다 !");
+                            p.sendMessage(messageHead() + ChatColor.WHITE + "/stat reset [플레이어] " + ChatColor.GREEN + "플레이어의 스텟을 초기화한다. " + ChatColor.GRAY + "(레벨 0)");
                         } else if(args[0].equalsIgnoreCase("set")){
-                            p.sendMessage(logo() + ChatColor.RED + "명령어가 올바르지 않습니다 !");
-                            p.sendMessage(logo() + ChatColor.WHITE + "/stat set [플레이어] [레벨] " + ChatColor.GREEN + "플레이어의 레벨을 임의로 지정합니다. " + ChatColor.GRAY + "(스텟은 초기화)");
+                            p.sendMessage(messageHead() + ChatColor.RED + "명령어가 올바르지 않습니다 !");
+                            p.sendMessage(messageHead() + ChatColor.WHITE + "/stat set [플레이어] [레벨] " + ChatColor.GREEN + "플레이어의 레벨을 임의로 지정합니다. " + ChatColor.GRAY + "(스텟은 초기화)");
                         }
-                    } else if(args.length == 2){
+                    } else if(args.length == 2){  //명령어 문자를 3개만 받은 경우-----------------------
                         if(args[0].equalsIgnoreCase("reset")){
-                            //플레이어 오류검사
-                            try{
+                            try{  //플레이어 오류검사
                                 //플레이어 선언
                                 Player a = Bukkit.getServer().getPlayerExact(args[1]);
-                                //플레이어 파일 선언
-                                File pf = new File(getDataFolder(), "playerdata/" + a.getUniqueId() + ".yml");
-                                FileConfiguration pFile = YamlConfiguration.loadConfiguration(pf);
                                 //플레이어 파일 검사
-                                if(pf.exists()){
+                                if(existPlayerFile(a)){
                                     a.setLevel(0);
                                     //스텟 초기화
-                                    for(String b : pFile.getConfigurationSection(String.valueOf(a.getUniqueId())).getKeys(false)){
-                                        pFile.set(a.getUniqueId() + "." + b, 1);
-                                        p.sendMessage(b);
-                                        p.sendMessage(String.valueOf(pFile.get(a.getUniqueId() + "." + b)));
+                                    for(String b : getPlayerKeys(a)){
+                                        setPlayerFile(a, b, 1);
                                     }
-                                    pFile.set(a.getUniqueId() + ".statpoint", 0);
-                                    p.sendMessage(logo() + ChatColor.WHITE + "[" + a.getName() + "] 님의 레벨(스텟)을 초기화시켰습니다 !");
-                                    //파일 저장
-                                    try {
-                                        pFile.save(pf);
-                                    } catch (IOException e) {
-                                        throw new RuntimeException(e);
-                                    }
+                                    setPlayerFile(a, "statpoint", 0);
+                                    p.sendMessage(messageHead() + ChatColor.WHITE + "[" + a.getName() + "] 님의 레벨(스텟)을 초기화시켰습니다 !");
                                 } else {
-                                    p.sendMessage(logo() + ChatColor.RED + "대상이 올바르지 않습니다 !");
+                                    playerErrorMessage(p);
                                 }
-                            } catch (NullPointerException e){
-                                p.sendMessage(logo() + ChatColor.RED + "대상이 올바르지 않습니다 !");
+                            } catch (NullPointerException e){  //플레이어에 오류가 있을 때
+                                playerErrorMessage(p);
                                 e.printStackTrace();
                                 return false;
                             }
-
                         } else if(args[0].equalsIgnoreCase("set")){
-                            p.sendMessage(logo() + ChatColor.RED + "명령어가 올바르지 않습니다 !");
-                            p.sendMessage(logo() + ChatColor.WHITE + "/stat set [플레이어] [레벨] " + ChatColor.GREEN + "플레이어의 레벨을 임의로 지정합니다. " + ChatColor.GRAY + "(스텟은 초기화)");
+                            p.sendMessage(messageHead() + ChatColor.RED + "명령어가 올바르지 않습니다 !");
+                            p.sendMessage(messageHead() + ChatColor.WHITE + "/stat set [플레이어] [레벨] " + ChatColor.GREEN + "플레이어의 레벨을 임의로 지정합니다. " + ChatColor.GRAY + "(스텟은 초기화)");
                         }
-                    //args.length 가 3개인 경우
-                    } else {
+                    } else {  //명령어 문자가 4개 이상인 경우------------------------
                         if(args[0].equalsIgnoreCase("set")){
-                            //플레이어 오류검사
-                            try{
+                            try{  //플레이어 오류검사
                                 //플레이어 선언
                                 Player a = Bukkit.getServer().getPlayerExact(args[1]);
-                                //파일
-                                File pf = new File(getDataFolder(),"playerdata/" + a.getUniqueId() + ".yml");
-                                FileConfiguration pFile = YamlConfiguration.loadConfiguration(pf);
-                                if(pf.exists()){
+                                if(existPlayerFile(a)){
                                     a.setLevel(Integer.parseInt(args[2]));
                                     //스텟 초기화
-                                    for(String b : pFile.getConfigurationSection(String.valueOf(a.getUniqueId())).getKeys(false)){
-                                        pFile.set(a.getUniqueId() + "." + b, 1);
+                                    for(String b : getPlayerKeys(p)){
+                                        setPlayerFile(a, b, 1);
                                     }
                                     //스텟 포인트 설정
-                                    pFile.set(a.getUniqueId() + ".statpoint", Integer.parseInt(args[2]));
-                                    try {
-                                        pFile.save(pf);
-                                    } catch (IOException e) {
-                                        throw new RuntimeException(e);
-                                    }
-                                    p.sendMessage(logo() + ChatColor.WHITE + "[" + a.getName() + "] 님의 스텟이 정상적으로 세팅되었습니다 !");
+                                    setPlayerFile(a, "statpoint", Integer.parseInt(args[2]));
+                                    p.sendMessage(messageHead() + ChatColor.WHITE + "[" + a.getName() + "] 님의 스텟이 정상적으로 세팅되었습니다 !");
                                 } else {
-                                    p.sendMessage(logo() + ChatColor.RED + "대상이 올바르지 않습니다 !");
+                                    playerErrorMessage(p);
                                 }
-                            } catch (NullPointerException e){
+                            } catch (NullPointerException e){ //플레이어에 오류가 있을 때
                                 e.printStackTrace();
-                                p.sendMessage(logo() + ChatColor.RED + "대상이 올바르지 않습니다 !");
+                                playerErrorMessage(p);
                                 return false;
                             }
 
                         }
-                    }
+                    } //args.length 가 3개인 경우---------------------
                 }
             }
         return false;
     }
-    //스텟 창 내 버튼 기능
+    //스텟 창 내 버튼 기능---------------------------------------------------------
     @EventHandler
     public void ivClick(InventoryClickEvent e) throws IOException {
         Player p = (Player) e.getWhoClicked();
@@ -291,7 +265,50 @@ public class RPGSTAT extends JavaPlugin implements Listener {
             }
         }
     }
-    public String logo(){
+    //메시지 헤더--------------------------------------------------------------
+    public String messageHead(){
         return ChatColor.BOLD + "" + ChatColor.DARK_GREEN + "[" + ChatColor.GREEN + "STAT" + ChatColor.DARK_GREEN + "] " + ChatColor.RESET + "";
+    }
+    //플레이어 입력 오류 메시지--------------------------------------------------------------
+    public void playerErrorMessage(Player p){
+        p.sendMessage(messageHead() + ChatColor.RED + "대상이 올바르지 않습니다 !");
+    }
+    //플레이어 파일 관련--------------------------------------------------------------
+    public Object getPlayerFile(Player p, String s){  //플레이어 파일에서 가져오기
+        File pf = new File(getDataFolder(),"playerdata/" + p.getUniqueId() + ".yml");
+        FileConfiguration pFile = YamlConfiguration.loadConfiguration(pf);
+
+        return pFile.get(p.getUniqueId() + "." + s);
+    }
+    public void setPlayerFile(Player p, String s, Object a){  //플레이어 파일 수정하기
+        File pf = new File(getDataFolder(),"playerdata/" + p.getUniqueId() + ".yml");
+        FileConfiguration pFile = YamlConfiguration.loadConfiguration(pf);
+
+        pFile.set(p.getUniqueId() + "." + s, a);
+
+        try {
+            pFile.save(pf);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    public Set<String> getPlayerKeys(Player p){  //플레이어 파일 키값 가져오기
+        File pf = new File(getDataFolder(),"playerdata/" + p.getUniqueId() + ".yml");
+        FileConfiguration pFile = YamlConfiguration.loadConfiguration(pf);
+
+        return pFile.getConfigurationSection(String.valueOf(p.getUniqueId())).getKeys(false);
+    }
+    public boolean existPlayerFile(Player p){  //플레이어 파일 존재여부 확인
+        File pf = new File(getDataFolder(),"playerdata/" + p.getUniqueId() + ".yml");
+        return pf.exists();
+    }
+    public void savePlayerFile(Player p){  //플레이어 파일 저장
+        File pf = new File(getDataFolder(),"playerdata/" + p.getUniqueId() + ".yml");
+        FileConfiguration pFile = YamlConfiguration.loadConfiguration(pf);
+        try {
+            pFile.save(pf);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
