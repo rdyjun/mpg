@@ -26,23 +26,19 @@ public class playerData extends playerFile {
     public void newPlayer(Player p){
         String pID = p.getUniqueId().toString();
         for(String a : RPGSTAT.getConfig().getConfigurationSection("stats").getKeys(false)){
-            config.set(pID + "." + a, 1);
+            config.set(pID + "." + a, 0);
         }
         config.set(pID + ".statpoint", 0);
         save();
     }
-    public void statUp(Player p, String stat) throws IOException {
-        UUID pID = p.getUniqueId();
-
-        File pf = new File(RPGSTAT.getDataFolder(),"playerdata/" + p.getUniqueId() + ".yml");
-        FileConfiguration pFile = YamlConfiguration.loadConfiguration(pf);
-        if(pFile.getInt(pID + ".statpoint") > 0){
-            if(pFile.getInt(pID + "." + stat) < 100){
-                pFile.set(pID + "." + stat, pFile.getInt(pID + "." + stat) + 1);
-                pFile.set(pID + "." + "statpoint", pFile.getInt(pID + ".statpoint") - 1);
-                p.sendMessage(ChatColor.BOLD + "" + ChatColor.DARK_GREEN + "[" + ChatColor.GREEN + "STAT" + ChatColor.DARK_GREEN + "] " + ChatColor.getByChar(String.valueOf(RPGSTAT.getConfig().get("stats." + stat + "." + "color"))) + RPGSTAT.getConfig().get("stats." + stat + ".name") + ChatColor.RESET + " " + ChatColor.WHITE + (pFile.getInt(pID + "." + stat) - 1) + " -> " + pFile.getInt(pID + "." + stat) + " 스텟 상승!");
+    public void statUp(Player p, String stat){
+        if((Integer)RPGSTAT.getPlayerFile(p, "statpoint") > 0){
+            if((Integer)RPGSTAT.getPlayerFile(p, stat) < (Integer)RPGSTAT.getConfig().get("setting.max")){
+                RPGSTAT.setPlayerFile(p, stat, (Integer)RPGSTAT.getPlayerFile(p, stat) + 1);
+                RPGSTAT.setPlayerFile(p, "statpoint", (Integer)RPGSTAT.getPlayerFile(p, "statpoint") - 1);
+                p.sendMessage(ChatColor.BOLD + "" + ChatColor.DARK_GREEN + "[" + ChatColor.GREEN + "STAT" + ChatColor.DARK_GREEN + "] " + ChatColor.getByChar(String.valueOf(RPGSTAT.getConfig().get("stats." + stat + "." + "color"))) + RPGSTAT.getConfig().get("stats." + stat + ".name") + ChatColor.RESET + " " + ChatColor.WHITE + ((Integer)RPGSTAT.getPlayerFile(p, stat) - 1) + " -> " + RPGSTAT.getPlayerFile(p, stat) + " 스텟 상승!");
             }
         }
-        pFile.save(pf);
+        RPGSTAT.savePlayerFile(p);
     }
 }

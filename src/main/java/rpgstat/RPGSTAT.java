@@ -24,6 +24,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import files.playerData;
+import org.bukkit.potion.PotionEffectType;
 
 import java.io.File;
 import java.io.IOException;
@@ -81,6 +82,8 @@ public class RPGSTAT extends JavaPlugin implements Listener {
             this.playerData = new playerData(this, "playerdata/" + p.getUniqueId() + ".yml");
             playerData.newPlayer(p);
         }
+        //플레이어 체력 설정
+        playerPatience(p);
     }
     public ItemStack StatInformation(Player p, String ItemName){
         String head;
@@ -124,7 +127,7 @@ public class RPGSTAT extends JavaPlugin implements Listener {
             lore.add(" ");
             //버튼 힌트
             for(String s : getConfig().getStringList(head + "." + ItemName + "." + "lore" + "." + "statup")){
-                if((Integer)(getPlayerFile(p, ItemName)) < 50) {
+                if((Integer)(getPlayerFile(p, ItemName)) < (Integer)getConfig().get("setting.max")) {
                     lore.add(ChatColor.DARK_GRAY + s);
                 } else {
                     lore.add(ChatColor.DARK_GRAY + "이 스텟은 더 이상 레벨을 올릴 수 없습니다.");
@@ -165,6 +168,7 @@ public class RPGSTAT extends JavaPlugin implements Listener {
     public Inventory inv(Player p){
         //스텟 메뉴 틀
         Inventory inv = Bukkit.createInventory(null, 9, "스텟");
+        inv.setMaxStackSize(100);
         for(String s : getConfig().getConfigurationSection("info").getKeys(false)){
             inv.setItem(getConfig().getInt("info." + s + ".position"), StatInformation(p, s));
         }
@@ -203,9 +207,10 @@ public class RPGSTAT extends JavaPlugin implements Listener {
                                     a.setLevel(0);
                                     //스텟 초기화
                                     for(String b : getPlayerKeys(a)){
-                                        setPlayerFile(a, b, 1);
+                                        setPlayerFile(a, b, 0);
                                     }
-                                    setPlayerFile(a, "statpoint", 0);
+                                    //체력 재설정
+                                    playerPatience(a);
                                     p.sendMessage(messageHead() + ChatColor.WHITE + "[" + a.getName() + "] 님의 레벨(스텟)을 초기화시켰습니다 !");
                                 } else {
                                     playerErrorMessage(p);
@@ -228,8 +233,10 @@ public class RPGSTAT extends JavaPlugin implements Listener {
                                     a.setLevel(Integer.parseInt(args[2]));
                                     //스텟 초기화
                                     for(String b : getPlayerKeys(p)){
-                                        setPlayerFile(a, b, 1);
+                                        setPlayerFile(a, b, 0);
                                     }
+                                    //체력 재설정
+                                    playerPatience(a);
                                     //스텟 포인트 설정
                                     setPlayerFile(a, "statpoint", Integer.parseInt(args[2]));
                                     p.sendMessage(messageHead() + ChatColor.WHITE + "[" + a.getName() + "] 님의 스텟이 정상적으로 세팅되었습니다 !");
@@ -256,6 +263,9 @@ public class RPGSTAT extends JavaPlugin implements Listener {
         if(!e.getView().getTitle().contains("스텟") || e.getCurrentItem() == null) {
             return;
         }
+        if((Integer)getPlayerFile(p, "patience") < 50 && e.getCurrentItem().getType() == Material.getMaterial(String.valueOf(getConfig().get("stats.patience.material")))){
+            playerPatience(p);
+        }
         //클릭한 아이템에 따른 작동
         e.setCancelled(true);
         for(String a : getConfig().getConfigurationSection("stats").getKeys(false)){
@@ -265,14 +275,35 @@ public class RPGSTAT extends JavaPlugin implements Listener {
             }
         }
     }
-    //플레이어 스텟 설정--------------------------------------
     @EventHandler
     public void playerAttack(EntityDamageByEntityEvent e){
-        e.setDamage(e.getDamage() * (Integer)getPlayerFile((Player) e.getDamager(), "attack") * (Double)getConfig().get("stats.attack.stat"));
+        Player p = (Player) e.getDamager();
+        if(isCritical(p)){
+            e.setDamage(e.getDamage());
+        }
+        if((Integer)getPlayerFile(p, "attack") != 0){
+            e.setDamage(e.getDamage() * ((Integer)getPlayerFile(p, "attack") * Double.valueOf(getConfig().getStringList("stats.attack.stat").get(0))));
+            e.setDamage(Math.floor(e.getDamage()*100)/100);
+            if(Math.random() <= (Integer)getPlayerFile(p, "attack") / 5 * Double.valueOf(getConfig().getStringList("stats.attack.stat").get(1))){
+                e.setDamage(e.getDamage() * 1.5);
+                p.sendMessage(messageHead() + ChatColor.YELLOW + "" + ChatColor.BOLD + "크리티컬 ! +" + e.getDamage());
+            }
+        }
+        e.getDamager().sendMessage(String.valueOf(e.getDamage()));
     }
-    @EventHandler
-    public void playerPatience(){
 
+    public void playerPatience(Player p){
+        p.setHealthScale(20 + (Integer)getPlayerFile(p, "patience") * Integer.parseInt(getConfig().getStringList("stats.patience.stat").get(0)));
+    }
+    //플레이어 크리티컬 여부 확인-------------------------------------
+    private boolean isCritical(Player p){
+        return
+                p.getFallDistance() > 0.0F &&
+                !p.isOnGround() &&
+                !p.isInsideVehicle() &&
+                !p.hasPotionEffect(PotionEffectType.BLINDNESS) &&
+                p.getLocation().getBlock().getType() != Material.LADDER &&
+                p.getLocation().getBlock().getType() != Material.VINE;
     }
     //메시지 헤더--------------------------------------------------------------
     public String messageHead(){
