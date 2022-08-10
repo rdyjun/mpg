@@ -3,6 +3,7 @@ package rpgstat;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -10,8 +11,11 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerExpChangeEvent;
+import org.bukkit.event.player.PlayerItemDamageEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
@@ -56,7 +60,6 @@ public class RPGSTAT extends JavaPlugin implements Listener {
         File pf = new File(getDataFolder(), "playerdata/" + p.getUniqueId() + ".yml");
         FileConfiguration pFile = YamlConfiguration.loadConfiguration(pf);
 
-        p.sendMessage(String.valueOf(e.getAmount()));
         if(e.getAmount() > 0){
             if(p.getExp() + e.getAmount() / (float)p.getExpToLevel() >= 1.0) {
                 UUID pID = p.getUniqueId();
@@ -78,8 +81,6 @@ public class RPGSTAT extends JavaPlugin implements Listener {
             this.playerData = new playerData(this, "playerdata/" + p.getUniqueId() + ".yml");
             playerData.newPlayer(p);
         }
-
-
     }
     public ItemStack StatInformation(Player p, String ItemName){
         String head;
@@ -123,10 +124,10 @@ public class RPGSTAT extends JavaPlugin implements Listener {
             lore.add(" ");
             //버튼 힌트
             for(String s : getConfig().getStringList(head + "." + ItemName + "." + "lore" + "." + "statup")){
-                if((Integer)(getPlayerFile(p, ItemName)) < (Integer)getConfig().get("setting.max")) {
+                if((Integer)(getPlayerFile(p, ItemName)) < 50) {
                     lore.add(ChatColor.DARK_GRAY + s);
                 } else {
-                    lore.add(ChatColor.DARK_GRAY + "더 이상 이 스텟 레벨을 올릴 수 없습니다.");
+                    lore.add(ChatColor.DARK_GRAY + "이 스텟은 더 이상 레벨을 올릴 수 없습니다.");
                 }
             }
         }
@@ -150,9 +151,8 @@ public class RPGSTAT extends JavaPlugin implements Listener {
         ItemMeta statMeta = stat.getItemMeta();
         //아이템 이름
         if(ItemName.equalsIgnoreCase("statpoint")){
-            statMeta.setDisplayName(chatColor + "" + ChatColor.BOLD + statName + " : " + getPlayerFile(p, "statpoint"));
+            statMeta.setDisplayName(chatColor + "" + ChatColor.BOLD + statName + " : " + ChatColor.YELLOW + getPlayerFile(p, "statpoint"));
         } else {
-            p.sendMessage(ItemName);
             statMeta.setDisplayName(chatColor + "" + ChatColor.BOLD + statName);
         }
         statMeta.setLore(lore);
@@ -253,7 +253,7 @@ public class RPGSTAT extends JavaPlugin implements Listener {
     public void ivClick(InventoryClickEvent e) throws IOException {
         Player p = (Player) e.getWhoClicked();
         //열려있는(스텟) 인벤토리
-        if(!e.getView().getTitle().contains("스텟") || e.getCurrentItem() == null){
+        if(!e.getView().getTitle().contains("스텟") || e.getCurrentItem() == null) {
             return;
         }
         //클릭한 아이템에 따른 작동
@@ -264,6 +264,15 @@ public class RPGSTAT extends JavaPlugin implements Listener {
                 p.openInventory(inv(p));
             }
         }
+    }
+    //플레이어 스텟 설정--------------------------------------
+    @EventHandler
+    public void playerAttack(EntityDamageByEntityEvent e){
+        e.setDamage(e.getDamage() * (Integer)getPlayerFile((Player) e.getDamager(), "attack") * (Double)getConfig().get("stats.attack.stat"));
+    }
+    @EventHandler
+    public void playerPatience(){
+
     }
     //메시지 헤더--------------------------------------------------------------
     public String messageHead(){
