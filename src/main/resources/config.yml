@@ -73,8 +73,8 @@ stats:
       statup:
         - "클릭 시 해당 스텟을 올립니다"
     stat:
-      - 0.25
-      - 0.08
+      공격력: 0.25
+      크리티컬: 0.08
     position: 2
 
   patience:
@@ -97,8 +97,8 @@ stats:
       statup:
         - "클릭 시 해당 스텟을 올립니다"
     stat:
-      - 2
-      - 20
+      체력: 2
+      기력: 20
     position: 3
 
   agility:
@@ -121,7 +121,8 @@ stats:
       statup:
         - "클릭 시 해당 스텟을 올립니다"
     stat:
-      1: 0.1, 2.5
+      이동속도: 0.1
+      공격속도: 2.5
     position: 4
 
   luck:
@@ -143,7 +144,10 @@ stats:
         - "  치명타 - 7%"
       statup:
         - "클릭 시 해당 스텟을 올립니다"
-    stat: 0, 4
+    stat:
+      회피율: 0
+      치명타: 4
+
     position: 5
 
   proficiency:
@@ -156,14 +160,15 @@ stats:
       nowlevel:
         - "현재 레벨: "
       nowlevellore:
-        - "  회피율 - 0%"
+        - "  경험치 흭득률 - 0%"
         - "  치명타 - 5%"
       nextlevel:
         - "다음 레벨: "
       nextlevellore:
-        - "  회피율 - 3%"
+        - "  경험치 흭득률 - 3%"
         - "  치명타 - 7%"
       statup:
         - "클릭 시 해당 스텟을 올립니다"
-    stat: 1
+    stat:
+      경험치흭득률: 1
     position: 6
