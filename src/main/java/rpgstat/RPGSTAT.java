@@ -15,9 +15,6 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerExpChangeEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemFlag;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffectType;
 
@@ -32,7 +29,7 @@ import java.util.*;
 public class RPGSTAT extends JavaPlugin implements Listener {
     private playerData playerData;
     private playerFile playerFile;
-
+    private itemLore itemLore;
     //플러그인 활성화
     @Override
     public void onEnable() {
@@ -41,8 +38,12 @@ public class RPGSTAT extends JavaPlugin implements Listener {
         if(!getDataFolder().exists()){
             getDataFolder().mkdirs();
         }
+        if(!new File(getDataFolder(), "playerdata").exists()){
+            new File(getDataFolder(), "playerdata").mkdirs();
+        }
         this.playerData = new playerData(this);
         this.playerFile = new playerFile(this);
+        this.itemLore = new itemLore(this);
         saveDefaultConfig();
     }
     //플러그인 비활성화
@@ -76,103 +77,21 @@ public class RPGSTAT extends JavaPlugin implements Listener {
     public void newPlayer(PlayerJoinEvent e){
         Player p = e.getPlayer();
         //플레이어 파일 생성
-        Bukkit.getConsoleSender().sendMessage("------------------A---------------------");
         playerFile.createFile(p);
-        Bukkit.getConsoleSender().sendMessage("------------------C---------------------");
         //플레이어 체력 설정
         playerPatience(p);
-    }
-    public ItemStack StatInformation(Player p, String ItemName){
-        String head;
-
-        if(getConfig().contains("stats." + ItemName)){
-            head = "stats";
-        } else {
-            head = "info";
-        }
-        Material material = Material.matchMaterial(String.valueOf(getConfig().get(head + "." + ItemName + "." + "material")));
-        ChatColor chatColor = ChatColor.getByChar(String.valueOf(getConfig().get(head + "." + ItemName + "." + "color")));
-        String statName = String.valueOf(getConfig().get(head + "." + ItemName + "." + "name"));
-        //LORE 영역
-        List<String> lore = new ArrayList<>();
-        //기본 아이템 설명
-        for(String s : getConfig().getStringList(head + "." + ItemName + "." + "lore" + "." + "itemlore")){
-            lore.add(ChatColor.BOLD + "" + ChatColor.translateAlternateColorCodes('&', s));
-        }
-        if(head == "stats"){
-            //현재 레벨
-            lore.add(ChatColor.GOLD + "현재 레벨 : " + playerFile.getPlayerFile(p, ItemName));
-            //현재 레벨 설명
-            int i = 0;
-            for(String s : getConfig().getConfigurationSection(head + "." + ItemName + ".stat").getKeys(false)){
-                lore.add(ChatColor.WHITE + "  " + s + " : +" + (Integer)playerFile.getPlayerFile(p, ItemName) * Double.valueOf(String.valueOf(getConfig().get(head + "." + ItemName + "." + "stat" + "." + s))).doubleValue());
-                i++;
-            }
-            //다음 레벨
-            if((Integer)(playerFile.getPlayerFile(p, ItemName)) < (Integer)getConfig().get("setting.max")){
-                lore.add(ChatColor.DARK_PURPLE + "다음 레벨 : " + ((Integer)(playerFile.getPlayerFile(p, ItemName)) + 1));
-            } else {
-                lore.add(ChatColor.DARK_PURPLE + "다음 레벨 : MAX");
-            }
-            //다음 레벨 설명
-            for(String s : getConfig().getStringList(head + "." + ItemName + "." + "lore" + "." + "nextlevellore")){
-                if((Integer)(playerFile.getPlayerFile(p, ItemName)) < (Integer)getConfig().get("setting.max")) {
-                    lore.add(ChatColor.GRAY + s);
-                } else {
-                    lore.add(ChatColor.GRAY + "  마지막 레벨입니다.");
-                }
-            }
-            //공백
-            lore.add(" ");
-            //버튼 힌트
-            for(String s : getConfig().getStringList(head + "." + ItemName + "." + "lore" + "." + "statup")){
-                if((Integer)(playerFile.getPlayerFile(p, ItemName)) < (Integer)getConfig().get("setting.max")) {
-                    lore.add(ChatColor.DARK_GRAY + s);
-                } else {
-                    lore.add(ChatColor.DARK_GRAY + "이 스텟은 더 이상 레벨을 올릴 수 없습니다.");
-                }
-            }
-        }
-        //아이템 선언
-        ItemStack stat;
-        //아이템 수량 지정
-        if(ItemName.equalsIgnoreCase("statpoint")){
-            int n;
-            if((Integer) playerFile.getPlayerFile(p, "statpoint") <= 0){
-                n = 1;
-            } else {
-                n = (Integer) playerFile.getPlayerFile(p, "statpoint");
-            }
-            stat = new ItemStack(material, n);
-        } else if(material == Material.getMaterial("STAINED_GLASS_PANE")){
-            stat = new ItemStack(material, 1, (short) 7);
-        } else {
-            stat = new ItemStack(material);
-        }
-
-        ItemMeta statMeta = stat.getItemMeta();
-        //아이템 이름
-        if(ItemName.equalsIgnoreCase("statpoint")){
-            statMeta.setDisplayName(chatColor + "" + ChatColor.BOLD + statName + " : " + ChatColor.YELLOW + playerFile.getPlayerFile(p, "statpoint"));
-        } else {
-            statMeta.setDisplayName(chatColor + "" + ChatColor.BOLD + statName);
-        }
-        statMeta.setLore(lore);
-        statMeta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
-        stat.setItemMeta(statMeta);
-
-        return stat;
+        playerAgility(p);
     }
     //스텟창 설정 ----------------------------
     public Inventory inv(Player p){
         //스텟 메뉴 틀
-        Inventory inv = Bukkit.createInventory(null, 9, "스텟");
+        Inventory inv = Bukkit.createInventory(null, (Integer) getConfig().get("setting.size"), "스텟");
         inv.setMaxStackSize(100);
         for(String s : getConfig().getConfigurationSection("info").getKeys(false)){
-            inv.setItem(getConfig().getInt("info." + s + ".position"), StatInformation(p, s));
+            inv.setItem(getConfig().getInt("info." + s + ".position"), itemLore.StatInformation(p, s));
         }
         for(String s : getConfig().getConfigurationSection("stats").getKeys(false)){
-            inv.setItem(getConfig().getInt("stats." + s + ".position"), StatInformation(p, s));
+            inv.setItem(getConfig().getInt("stats." + s + ".position"), itemLore.StatInformation(p, s));
         }
         p.openInventory(inv);
         return inv;
@@ -262,15 +181,18 @@ public class RPGSTAT extends JavaPlugin implements Listener {
         if(!e.getView().getTitle().contains("스텟") || e.getCurrentItem() == null) {
             return;
         }
-        if((Integer)playerFile.getPlayerFile(p, "patience") < 50 && e.getCurrentItem().getType() == Material.getMaterial(String.valueOf(getConfig().get("stats.patience.material")))){
-            playerPatience(p);
-        }
         //클릭한 아이템에 따른 작동
         e.setCancelled(true);
         for(String a : getConfig().getConfigurationSection("stats").getKeys(false)){
             if(e.getCurrentItem().getItemMeta().getDisplayName().contains(String.valueOf(getConfig().get("stats" + "." + a + "." + "name")))){
                 playerData.statUp(p, a);
                 p.openInventory(inv(p));
+            }
+            if(a.contains("agility") && (Integer)playerFile.getPlayerFile(p, "agility") <= 50){
+                playerAgility(p);
+            }
+            if(a.contains("patience") && (Integer)playerFile.getPlayerFile(p, "patience") <= 50){
+                playerPatience(p);
             }
         }
     }
@@ -281,9 +203,9 @@ public class RPGSTAT extends JavaPlugin implements Listener {
             e.setDamage(e.getDamage() / 1.5);
         }
         if((Integer)playerFile.getPlayerFile(p, "attack") != 0){
-            e.setDamage(e.getDamage() * ((Integer)playerFile.getPlayerFile(p, "attack") * Double.valueOf(String.valueOf(getConfig().get("stats.attack.stat.치명타확률"))).doubleValue()));
+            e.setDamage(e.getDamage() * (((Integer)playerFile.getPlayerFile(p, "attack") * Double.valueOf(String.valueOf(getConfig().get("stats.attack.stat.치명타확률"))).doubleValue()) + 1));
             e.setDamage(Math.round(e.getDamage()*100)/100);
-            if(Math.random() <= (Integer)playerFile.getPlayerFile(p, "attack") / 5 * Double.valueOf(String.valueOf(getConfig().get("stats.attack.stat.치명타확률"))).doubleValue()){
+            if(Math.random() <= (Integer)playerFile.getPlayerFile(p, "attack") / 5 * Double.valueOf(String.valueOf(getConfig().get("stats.luck.stat.치명타확률"))).doubleValue()){
                 e.setDamage(e.getDamage() * 1.5);
                 p.sendMessage(messageHead() + ChatColor.YELLOW + "" + ChatColor.BOLD + "크리티컬 ! +" + e.getDamage());
             }
@@ -294,7 +216,11 @@ public class RPGSTAT extends JavaPlugin implements Listener {
     }
 
     public void playerPatience(Player p){
-        p.setHealthScale(20 + (Integer)playerFile.getPlayerFile(p, "patience") * Integer.parseInt(String.valueOf(getConfig().get("stats.patience.stat.체력"))));
+        p.setHealthScale(20 + (Integer)playerFile.getPlayerFile(p, "patience") * Integer.parseInt(String.valueOf(getConfig().get("stats.patience.statpls.체력"))));
+    }
+    public void playerAgility(Player p){
+        p.setWalkSpeed(0.2f + Float.parseFloat(String.valueOf(playerFile.getPlayerFile(p, "agility"))) * Float.parseFloat(String.valueOf(getConfig().get("stats.agility.stat.이동속도"))));
+        p.setFlySpeed(0.2f + Float.parseFloat(String.valueOf(playerFile.getPlayerFile(p, "agility"))) * Float.parseFloat(String.valueOf(getConfig().get("stats.agility.stat.이동속도"))));
     }
     //플레이어 크리티컬 여부 확인-------------------------------------
     private boolean isCritical(Player p){
@@ -314,5 +240,4 @@ public class RPGSTAT extends JavaPlugin implements Listener {
     public void playerErrorMessage(Player p){
         p.sendMessage(messageHead() + ChatColor.RED + "대상이 올바르지 않습니다 !");
     }
-
 }

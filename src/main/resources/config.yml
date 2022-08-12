@@ -5,6 +5,7 @@
 ######################################################################
 setting:
   max: 50
+  size: 9
 info:
   reset:
     type: "reset"
@@ -62,19 +63,11 @@ stats:
     color: c
     lore:
       itemlore: "&a물리 / 마법 &f공격력 증가 스텟"
-      nowlevel:
-        - "현재 레벨: "
-      nowlevellore:
-        - "  공격력 - 100%"
-      nextlevel:
-        - "다음 레벨: "
-      nextlevellore:
-        - "  공격력 - 105%"
       statup:
         - "클릭 시 해당 스텟을 올립니다"
     stat:
       공격력: 0.25
-      크리티컬: 0.08
+      치명타데미지: 0.1
     position: 2
 
   patience:
@@ -84,21 +77,11 @@ stats:
     color: 6
     lore:
       itemlore: "체력 / 마나 증가 스텟"
-      nowlevel:
-        - "현재 레벨: "
-      nowlevellore:
-        - "  체력 - 100%"
-        - "  마나 - 100%"
-      nextlevel:
-        - "다음 레벨: "
-      nextlevellore:
-        - "  체력 - 105%"
-        - "  마나 - 105%"
       statup:
         - "클릭 시 해당 스텟을 올립니다"
-    stat:
+    statpls:
       체력: 2
-      기력: 20
+      기력: 1
     position: 3
 
   agility:
@@ -108,21 +91,11 @@ stats:
     color: b
     lore:
       itemlore: "&a이동속도 / 공격속도 &f증가 스텟"
-      nowlevel:
-        - "현재 레벨: "
-      nowlevellore:
-        - "  이동속도 - 100%"
-        - "  공격속도 - 100%"
-      nextlevel:
-        - "다음 레벨: "
-      nextlevellore:
-        - "  이동속도 - 101%"
-        - "  공격속도 - 103%"
       statup:
         - "클릭 시 해당 스텟을 올립니다"
     stat:
-      이동속도: 0.1
-      공격속도: 2.5
+      이동속도: 0.005
+      공격속도: 0.1
     position: 4
 
   luck:
@@ -132,21 +105,12 @@ stats:
     color: a
     lore:
       itemlore: "&a회피 / 치명타 &f확률 증가 스텟"
-      nowlevel:
-        - "현재 레벨: "
-      nowlevellore:
-        - "  회피율 - 0%"
-        - "  치명타 - 5%"
-      nextlevel:
-        - "다음 레벨: "
-      nextlevellore:
-        - "  회피율 - 3%"
-        - "  치명타 - 7%"
       statup:
         - "클릭 시 해당 스텟을 올립니다"
-    stat:
+    statper:
       회피율: 0
-      치명타: 4
+    specific:
+      치명타확률: 0.08
 
     position: 5
 
@@ -157,18 +121,8 @@ stats:
     color: e
     lore:
       itemlore: "&5경험치 획득 &f확률 증가 스텟"
-      nowlevel:
-        - "현재 레벨: "
-      nowlevellore:
-        - "  경험치 흭득률 - 0%"
-        - "  치명타 - 5%"
-      nextlevel:
-        - "다음 레벨: "
-      nextlevellore:
-        - "  경험치 흭득률 - 3%"
-        - "  치명타 - 7%"
       statup:
         - "클릭 시 해당 스텟을 올립니다"
-    stat:
+    statper:
       경험치흭득률: 1
     position: 6
