@@ -10,63 +10,81 @@ import rpgstat.RpgStat;
 
 public class PlayerFile {
 
-    private final RpgStat rpgStat;
-    private File file;
-    private FileConfiguration config;
+    private static RpgStat rpgStat;
 
     public PlayerFile(RpgStat rpgStat) {
-        this.rpgStat = rpgStat;
+        PlayerFile.rpgStat = rpgStat;
     }
 
-    public void createFile(Player p) {
-        fileGet(p);
-        configGet(p);
+    /**
+     * 플레이어 파일 생성
+     *
+     * @param player
+     */
+    public static void createFile(Player player) {
+        File file = getFile(player);
+        FileConfiguration config = getConfig(player);
 
-        if (existPlayerFile(p)) {
+        if (existPlayerFile(player)) {
             return;
         }
 
         try {
             file.createNewFile();
 
-            for (String s : RPGSTAT.getConfig().getConfigurationSection("stats").getKeys(false)) {
-                setPlayerFile(p, s, 0);
+            for (String statName : rpgStat.getConfig().getConfigurationSection("stats").getKeys(false)) {
+                setPlayerFile(player, statName, 0);
             }
-            setPlayerFile(p, "statpoint", 0);
+            setPlayerFile(player, "statpoint", 0);
 
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    //플레이어 파일 관련--------------------------------------------------------------
-    //플레이어 파일에서 가져오기
-    public Object getPlayerFile(Player p, String s) {  //플레이어 파일에서 가져오기
-        configGet(p);
+    /**
+     * 플레이어 파일 값 가져오기
+     *
+     * @param player   플레이어
+     * @param statName 스텟 이름
+     * @return 스텟 값
+     */
+    public static Object getPlayerFile(Player player, String statName) {
+        FileConfiguration config = getConfig(player);
 
-        return config.get(p.getUniqueId() + "." + s);
+        return config.get(player.getUniqueId() + "." + statName);
     }
 
-    public void setPlayerFile(Player p, String s, Object a) {  //플레이어 파일 수정하기
-        configGet(p);
+    /**
+     * 플레이어 스탯 수정
+     *
+     * @param player   플레이어
+     * @param statName 스텟 이름
+     * @param value    스텟 값
+     */
+    public static void setPlayerFile(Player player, String statName, Object value) {
+        FileConfiguration config = getConfig(player);
 
-        config.set(p.getUniqueId() + "." + s, a);
-        savePlayerFile(p);
+        config.set(player.getUniqueId() + "." + statName, value);
+        savePlayerFile(player);
     }
 
-    public Set<String> getPlayerKeys(Player p) {  //플레이어 파일 키값 가져오기
-        configGet(p);
+    public static Set<String> getPlayerKeys(Player p) {  //플레이어 파일 키값 가져오기
+        FileConfiguration config = getConfig(p);
 
         return config.getConfigurationSection(String.valueOf(p.getUniqueId())).getKeys(false);
     }
 
-    public boolean existPlayerFile(Player p) {  //플레이어 파일 존재여부 확인
-        fileGet(p);
+    public static boolean existPlayerFile(Player player) {  //플레이어 파일 존재여부 확인
+        File file = getFile(player);
 
         return file.exists();
     }
 
-    public void savePlayerFile(Player p) {  //플레이어 파일 저장
+    public static void savePlayerFile(Player player) {  //플레이어 파일 저장
+        File file = getFile(player);
+        FileConfiguration config = getConfig(player);
+
         try {
             config.save(file);
         } catch (IOException e) {
@@ -74,12 +92,12 @@ public class PlayerFile {
         }
     }
 
-    public void fileGet(Player p) {
-        this.file = new File(RPGSTAT.getDataFolder(), "playerdata/" + p.getUniqueId() + ".yml");
+    public static File getFile(Player p) {
+        return new File(rpgStat.getDataFolder(), "playerdata/" + p.getUniqueId() + ".yml");
     }
 
-    public void configGet(Player p) {
-        fileGet(p);
-        this.config = YamlConfiguration.loadConfiguration(file);
+    public static FileConfiguration getConfig(Player player) {
+        File file = getFile(player);
+        return YamlConfiguration.loadConfiguration(file);
     }
 }

@@ -86,8 +86,9 @@ public class RpgStat extends JavaPlugin implements Listener {
     @EventHandler
     public void newPlayer(PlayerJoinEvent e) {
         Player p = e.getPlayer();
+
         //플레이어 파일 생성
-        playerFile.createFile(p);
+        PlayerFile.createFile(p);
         //플레이어 체력 설정
         playerPatience(p);
         playerAgility(p);
@@ -112,84 +113,109 @@ public class RpgStat extends JavaPlugin implements Listener {
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         Player p = (Player) sender;
-        if (cmd.getName().equalsIgnoreCase("stat")) {
-            if (args.length == 0) {
-                this.inv(p);
-            } else if (p.isOp()) {
-                if (args.length == 1) {
-                    if (args[0].equalsIgnoreCase("admin")) {
-                        p.sendMessage(messageHead() + ChatColor.WHITE + "/stat reset [플레이어] " + ChatColor.GREEN
-                                + "플레이어의 스텟을 초기화한다. " + ChatColor.GRAY + "(레벨 0)");
-                        p.sendMessage(messageHead() + ChatColor.WHITE + "/stat set [플레이어] [레벨] " + ChatColor.GREEN
-                                + "플레이어의 레벨을 임의로 지정합니다. " + ChatColor.GRAY + "(스텟은 초기화)");
-                    } else if (args[0].equalsIgnoreCase("reset")) {
-                        p.sendMessage(messageHead() + ChatColor.RED + "명령어가 올바르지 않습니다 !");
-                        p.sendMessage(messageHead() + ChatColor.WHITE + "/stat reset [플레이어] " + ChatColor.GREEN
-                                + "플레이어의 스텟을 초기화한다. " + ChatColor.GRAY + "(레벨 0)");
-                    } else if (args[0].equalsIgnoreCase("set")) {
-                        p.sendMessage(messageHead() + ChatColor.RED + "명령어가 올바르지 않습니다 !");
-                        p.sendMessage(messageHead() + ChatColor.WHITE + "/stat set [플레이어] [레벨] " + ChatColor.GREEN
-                                + "플레이어의 레벨을 임의로 지정합니다. " + ChatColor.GRAY + "(스텟은 초기화)");
-                    }
-                } else if (args.length == 2) {  //명령어 문자를 3개만 받은 경우-----------------------
-                    if (args[0].equalsIgnoreCase("reset")) {
-                        try {  //플레이어 오류검사
-                            //플레이어 선언
-                            Player a = Bukkit.getServer().getPlayerExact(args[1]);
-                            //플레이어 파일 검사
-                            if (playerFile.existPlayerFile(a)) {
-                                a.setLevel(0);
-                                //스텟 초기화
-                                for (String b : playerFile.getPlayerKeys(a)) {
-                                    playerFile.setPlayerFile(a, b, 0);
-                                }
-                                //체력 재설정
-                                playerPatience(a);
-                                p.sendMessage(messageHead() + ChatColor.WHITE + "[" + a.getName()
-                                        + "] 님의 레벨(스텟)을 초기화시켰습니다 !");
-                            } else {
-                                playerErrorMessage(p);
-                            }
-                        } catch (NullPointerException e) {  //플레이어에 오류가 있을 때
-                            playerErrorMessage(p);
-                            e.printStackTrace();
-                            return false;
-                        }
-                    } else if (args[0].equalsIgnoreCase("set")) {
-                        p.sendMessage(messageHead() + ChatColor.RED + "명령어가 올바르지 않습니다 !");
-                        p.sendMessage(messageHead() + ChatColor.WHITE + "/stat set [플레이어] [레벨] " + ChatColor.GREEN
-                                + "플레이어의 레벨을 임의로 지정합니다. " + ChatColor.GRAY + "(스텟은 초기화)");
-                    }
-                } else if (args.length == 3) {  //명령어 문자가 4개 이상인 경우------------------------
-                    if (args[0].equalsIgnoreCase("set")) {
-                        try {  //플레이어 오류검사
-                            //플레이어 선언
-                            Player a = Bukkit.getServer().getPlayerExact(args[1]);
-                            if (playerFile.existPlayerFile(a)) {
-                                a.setLevel(Integer.parseInt(args[2]));
-                                //스텟 초기화
-                                for (String b : playerFile.getPlayerKeys(p)) {
-                                    playerFile.setPlayerFile(a, b, 0);
-                                }
-                                //체력 재설정
-                                playerPatience(a);
-                                //스텟 포인트 설정
-                                playerFile.setPlayerFile(a, "statpoint", Integer.parseInt(args[2]));
-                                p.sendMessage(messageHead() + ChatColor.WHITE + "[" + a.getName()
-                                        + "] 님의 스텟이 정상적으로 세팅되었습니다 !");
-                            } else {
-                                playerErrorMessage(p);
-                            }
-                        } catch (NullPointerException e) { //플레이어에 오류가 있을 때
-                            e.printStackTrace();
-                            playerErrorMessage(p);
-                            return false;
-                        }
-
-                    }
-                } //args.length 가 3개인 경우---------------------
-            }
+        if (!cmd.getName().equalsIgnoreCase("stat")) {
+            return false;
         }
+
+        if (args.length == 0) {
+            this.inv(p);
+            return true;
+        }
+
+        if (args.length == 1) {
+            if (args[0].equalsIgnoreCase("admin")) {
+                p.sendMessage(messageHead() + ChatColor.WHITE + "/stat reset [플레이어] " + ChatColor.GREEN
+                        + "플레이어의 스텟을 초기화한다. " + ChatColor.GRAY + "(레벨 0)");
+                p.sendMessage(messageHead() + ChatColor.WHITE + "/stat set [플레이어] [레벨] " + ChatColor.GREEN
+                        + "플레이어의 레벨을 임의로 지정합니다. " + ChatColor.GRAY + "(스텟은 초기화)");
+            }
+
+            if (args[0].equalsIgnoreCase("reset")) {
+                p.sendMessage(messageHead() + ChatColor.RED + "명령어가 올바르지 않습니다 !");
+                p.sendMessage(messageHead() + ChatColor.WHITE + "/stat reset [플레이어] " + ChatColor.GREEN
+                        + "플레이어의 스텟을 초기화한다. " + ChatColor.GRAY + "(레벨 0)");
+            }
+
+            if (args[0].equalsIgnoreCase("set")) {
+                p.sendMessage(messageHead() + ChatColor.RED + "명령어가 올바르지 않습니다 !");
+                p.sendMessage(messageHead() + ChatColor.WHITE + "/stat set [플레이어] [레벨] " + ChatColor.GREEN
+                        + "플레이어의 레벨을 임의로 지정합니다. " + ChatColor.GRAY + "(스텟은 초기화)");
+            }
+
+            return true;
+        }
+
+        if (args.length == 2) {  //명령어 문자를 3개만 받은 경우-----------------------
+            if (args[0].equalsIgnoreCase("reset")) {
+                try {  //플레이어 오류검사
+                    //플레이어 선언
+                    Player a = Bukkit.getServer().getPlayerExact(args[1]);
+                    //플레이어 파일 검사
+                    if (PlayerFile.existPlayerFile(a)) {
+                        a.setLevel(0);
+                        //스텟 초기화
+                        for (String b : PlayerFile.getPlayerKeys(a)) {
+                            PlayerFile.setPlayerFile(a, b, 0);
+                        }
+                        //체력 재설정
+                        playerPatience(a);
+                        p.sendMessage(messageHead() + ChatColor.WHITE + "[" + a.getName()
+                                + "] 님의 레벨(스텟)을 초기화시켰습니다 !");
+                    } else {
+                        playerErrorMessage(p);
+                    }
+                } catch (NullPointerException e) {  //플레이어에 오류가 있을 때
+                    playerErrorMessage(p);
+                    e.printStackTrace();
+                    return false;
+                }
+
+                return true;
+            }
+
+            if (args[0].equalsIgnoreCase("set")) {
+                p.sendMessage(messageHead() + ChatColor.RED + "명령어가 올바르지 않습니다 !");
+                p.sendMessage(messageHead() + ChatColor.WHITE + "/stat set [플레이어] [레벨] " + ChatColor.GREEN
+                        + "플레이어의 레벨을 임의로 지정합니다. " + ChatColor.GRAY + "(스텟은 초기화)");
+
+                return true;
+            }
+
+            return false;
+        }
+
+        if (args.length == 3) {  //명령어 문자가 4개 이상인 경우------------------------
+            if (!args[0].equalsIgnoreCase("set")) {
+                return false;
+            }
+
+            try {  //플레이어 오류검사
+                //플레이어 선언
+                Player a = Bukkit.getServer().getPlayerExact(args[1]);
+                if (PlayerFile.existPlayerFile(a)) {
+                    a.setLevel(Integer.parseInt(args[2]));
+                    //스텟 초기화
+                    for (String b : PlayerFile.getPlayerKeys(p)) {
+                        PlayerFile.setPlayerFile(a, b, 0);
+                    }
+                    //체력 재설정
+                    playerPatience(a);
+                    //스텟 포인트 설정
+                    PlayerFile.setPlayerFile(a, "statpoint", Integer.parseInt(args[2]));
+                    p.sendMessage(messageHead() + ChatColor.WHITE + "[" + a.getName()
+                            + "] 님의 스텟이 정상적으로 세팅되었습니다 !");
+                } else {
+                    playerErrorMessage(p);
+                }
+            } catch (NullPointerException e) { //플레이어에 오류가 있을 때
+                e.printStackTrace();
+                playerErrorMessage(p);
+                return false;
+            }
+
+            return true;
+        }
+
         return false;
     }
 
@@ -209,10 +235,10 @@ public class RpgStat extends JavaPlugin implements Listener {
                 playerData.statUp(p, a);
                 p.openInventory(inv(p));
             }
-            if (a.contains("agility") && (Integer) playerFile.getPlayerFile(p, "agility") <= 50) {
+            if (a.contains("agility") && (Integer) PlayerFile.getPlayerFile(p, "agility") <= 50) {
                 playerAgility(p);
             }
-            if (a.contains("patience") && (Integer) playerFile.getPlayerFile(p, "patience") <= 50) {
+            if (a.contains("patience") && (Integer) PlayerFile.getPlayerFile(p, "patience") <= 50) {
                 playerPatience(p);
             }
         }
@@ -221,35 +247,33 @@ public class RpgStat extends JavaPlugin implements Listener {
     @EventHandler
     public void playerAttack(EntityDamageByEntityEvent e) {
         Player p = (Player) e.getDamager();
-        if (isCritical(p)) {
-            e.setDamage(e.getDamage() / 1.5);
+        Integer power = (Integer) PlayerFile.getPlayerFile(p, "attack");
+        Double criticalHitChange = (Double) PlayerFile.getPlayerFile(p, "critical-hit-chance");
+
+        boolean isCritical = isCritical(p) || Math.random() <= criticalHitChange;
+        if (isCritical) {
+            Double criticalHitMultiple = (Double) PlayerFile.getPlayerFile(p, "critical-hit-multiple");
+            e.setDamage(power * criticalHitMultiple);
+            p.sendMessage(messageHead() + ChatColor.YELLOW + ChatColor.BOLD + "크리티컬 ! +" + e.getDamage());
+
+            return;
         }
-        if ((Integer) playerFile.getPlayerFile(p, "attack") != 0) {
-            e.setDamage(e.getDamage() * (((Integer) playerFile.getPlayerFile(p, "attack") * Double.valueOf(
-                    String.valueOf(getConfig().get("stats.attack.stat.치명타확률"))).doubleValue()) + 1));
-            e.setDamage(Math.round(e.getDamage() * 100) / 100);
-            if (Math.random() <= (Integer) playerFile.getPlayerFile(p, "attack") / 5 * Double.valueOf(
-                    String.valueOf(getConfig().get("stats.luck.stat.치명타확률"))).doubleValue()) {
-                e.setDamage(e.getDamage() * 1.5);
-                p.sendMessage(messageHead() + ChatColor.YELLOW + ChatColor.BOLD + "크리티컬 ! +" + e.getDamage());
-            }
-        } else {
-            e.setDamage(Math.round(e.getDamage() * 100) / 100);
-        }
-        e.getDamager().sendMessage(String.valueOf(e.getDamage()));
+
+        e.setDamage(power);
+        p.sendMessage(String.valueOf(e.getDamage()));
     }
 
     public void playerPatience(Player p) {
-        p.setHealthScale(20 + (Integer) playerFile.getPlayerFile(p, "patience") * Integer.parseInt(
+        p.setHealthScale(20 + (Integer) PlayerFile.getPlayerFile(p, "patience") * Integer.parseInt(
                 String.valueOf(getConfig().get("stats.patience.statpls.체력"))));
     }
 
     public void playerAgility(Player p) {
         p.setWalkSpeed(
-                0.2f + Float.parseFloat(String.valueOf(playerFile.getPlayerFile(p, "agility"))) * Float.parseFloat(
+                0.2f + Float.parseFloat(String.valueOf(PlayerFile.getPlayerFile(p, "agility"))) * Float.parseFloat(
                         String.valueOf(getConfig().get("stats.agility.stat.이동속도"))));
         p.setFlySpeed(
-                0.2f + Float.parseFloat(String.valueOf(playerFile.getPlayerFile(p, "agility"))) * Float.parseFloat(
+                0.2f + Float.parseFloat(String.valueOf(PlayerFile.getPlayerFile(p, "agility"))) * Float.parseFloat(
                         String.valueOf(getConfig().get("stats.agility.stat.이동속도"))));
     }
 

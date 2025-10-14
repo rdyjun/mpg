@@ -56,19 +56,31 @@ info:
 
 
 stats:
+  vitality:
+    type: "stat"
+    material: APPLE
+    name: "생명력"
+    color: c
+    lore:
+      itemlore: "&a최대 체력 &f증가 스텟"
+      statup:
+        - "클릭 시 체력이 1 증가합니다."
+      amount:
+        health: 1
+    position: 2
   attack:
     type: "stat"
     material: IRON_SWORD
     name: "공격력"
     color: c
     lore:
-      itemlore: "&a물리 / 마법 &f공격력 증가 스텟"
+      itemlore: "&a공격력 &f증가 스텟"
       statup:
         - "클릭 시 해당 스텟을 올립니다"
-    stat:
-      공격력: 0.25
-      치명타데미지: 0.1
-    position: 2
+      amount:
+        damage: 0.25
+        critical-damage: 0.1
+    position: 3
 
   patience:
     type: "stat"
@@ -76,13 +88,13 @@ stats:
     name: "인내"
     color: 6
     lore:
-      itemlore: "체력 / 마나 증가 스텟"
+      itemlore: "방어력 증가 스텟"
       statup:
         - "클릭 시 해당 스텟을 올립니다"
-    statpls:
-      체력: 2
-      기력: 1
-    position: 3
+      amount:
+        defence: 2
+        hungry: 2
+    position: 4
 
   agility:
     type: "stat"
@@ -93,10 +105,10 @@ stats:
       itemlore: "&a이동속도 / 공격속도 &f증가 스텟"
       statup:
         - "클릭 시 해당 스텟을 올립니다"
-    stat:
-      이동속도: 0.005
-      공격속도: 0.1
-    position: 4
+    amount:
+      speed: 0.005
+      evasion: 0.2
+    position: 5
 
   luck:
     type: "stat"
@@ -107,12 +119,9 @@ stats:
       itemlore: "&a회피 / 치명타 &f확률 증가 스텟"
       statup:
         - "클릭 시 해당 스텟을 올립니다"
-    statper:
-      회피율: 0
-    specific:
-      치명타확률: 0.08
-
-    position: 5
+    amount:
+      luck: 3
+    position: 6
 
   proficiency:
     type: "stat"
@@ -123,6 +132,16 @@ stats:
       itemlore: "&5경험치 획득 &f확률 증가 스텟"
       statup:
         - "클릭 시 해당 스텟을 올립니다"
-    statper:
-      경험치흭득률: 1
-    position: 6
+    amount:
+      exp-probability: 1
+    position: 7
+
+    magic-engineering:
+      type: "stat"
+      meterial: ENDER_PEARL
+      name: "마법공학"
+      color: d
+      lore:
+        itemlore: "&d희귀 인챈트 &f확률 증가 스텟"
+
+      position: 8
