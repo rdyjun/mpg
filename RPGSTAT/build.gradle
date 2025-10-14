@@ -1,0 +1,51 @@
+plugins {
+    id 'java'
+    id 'com.github.johnrengelman.shadow' version '8.1.1' // Maven Shade 플러그인 대체
+}
+
+group = 'RPGSTAT'
+version = '1.0-SNAPSHOT'
+description = 'RPGSTAT'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+repositories {
+    mavenCentral()
+    maven {
+        url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
+    }
+    maven {
+        url = 'https://oss.sonatype.org/content/repositories/snapshots/'
+    }
+}
+
+dependencies {
+    compileOnly 'org.spigotmc:spigot-api:1.12.2-R0.1-SNAPSHOT'
+    implementation 'org.jetbrains:annotations:22.0.0'
+    testImplementation 'junit:junit:4.13.2'
+}
+
+// 리소스 필터링 (필요 시)
+processResources {
+    from(sourceSets.main.resources.srcDirs) {
+        include '**/*.yml'
+        // 만약 리소스 내에 ${...} 치환이 필요하면 아래처럼
+        // filteringCharset = 'UTF-8'
+        // expand(project.properties)
+    }
+}
+
+// Shadow(Shade) 플러그인 설정: fat JAR 생성
+shadowJar {
+    archiveBaseName.set('RPGSTAT')
+    archiveVersion.set(version)
+    mergeServiceFiles()
+    // createDependencyReducedPom 기능은 Shadow에서 자동 처리됨
+}
+
+build {
+    dependsOn shadowJar
+}

@@ -1,0 +1,46 @@
+plugins {
+    id 'java'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
+}
+
+group = 'CUSTOMITEM'
+version = '1.0-SNAPSHOT'
+description = 'CUSTOMITEM'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+repositories {
+    mavenCentral()
+    maven {
+        url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
+    }
+    maven {
+        url = 'https://oss.sonatype.org/content/repositories/snapshots/'
+    }
+}
+
+dependencies {
+    compileOnly 'org.spigotmc:spigot-api:1.12.2-R0.1-SNAPSHOT'
+}
+
+// 리소스 필터링 (필요 시)
+processResources {
+    from(sourceSets.main.resources.srcDirs) {
+        include '**/*'
+        // filteringCharset = 'UTF-8'
+        // expand(project.properties)
+    }
+}
+
+shadowJar {
+    archiveBaseName.set('CUSTOMITEM')
+    archiveVersion.set(version)
+    mergeServiceFiles()
+}
+
+build {
+    dependsOn shadowJar
+}
