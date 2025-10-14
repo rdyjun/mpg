@@ -1,6 +1,7 @@
 package rpgstat;
 
 import agility.Agility;
+import damage.Damage;
 import files.PlayerData;
 import files.PlayerFile;
 import java.io.File;
@@ -31,6 +32,7 @@ public class RpgStat extends JavaPlugin implements Listener {
     private ItemLore itemLore;
     private Agility agility;
     private Vitality vitality;
+    private Damage damage;
 
     //플러그인 활성화
     @Override
@@ -50,6 +52,7 @@ public class RpgStat extends JavaPlugin implements Listener {
         this.itemLore = new ItemLore(this);
         this.agility = new Agility(this);
         this.vitality = new Vitality(this);
+        this.damage = new Damage(this);
         saveDefaultConfig();
     }
 
@@ -97,6 +100,7 @@ public class RpgStat extends JavaPlugin implements Listener {
         playerPatience(player);
         agility.init(player);
         vitality.init(player);
+        damage.init(player);
     }
 
     //스텟창 설정 ----------------------------
