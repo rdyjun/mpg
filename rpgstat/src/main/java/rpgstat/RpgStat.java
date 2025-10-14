@@ -30,6 +30,7 @@ public class RpgStat extends JavaPlugin implements Listener {
     private PlayerData playerData;
     private ItemLore itemLore;
     private Agility agility;
+    private Vitality vitality;
 
     //플러그인 활성화
     @Override
@@ -48,6 +49,7 @@ public class RpgStat extends JavaPlugin implements Listener {
         this.playerData = new PlayerData(this);
         this.itemLore = new ItemLore(this);
         this.agility = new Agility(this);
+        this.vitality = new Vitality(this);
         saveDefaultConfig();
     }
 
@@ -94,6 +96,7 @@ public class RpgStat extends JavaPlugin implements Listener {
         //플레이어 체력 설정
         playerPatience(player);
         agility.initAgility(player);
+        vitality.initVitality(player);
     }
 
     //스텟창 설정 ----------------------------
@@ -247,7 +250,7 @@ public class RpgStat extends JavaPlugin implements Listener {
             }
 
             if (statName.contains("vitality")) {
-                Vitality.updateVitality(player);
+                vitality.updateVitality(player);
             }
         }
     }
