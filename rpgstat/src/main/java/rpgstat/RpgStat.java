@@ -1,5 +1,10 @@
 package rpgstat;
 
+import files.PlayerData;
+import files.PlayerFile;
+import java.io.File;
+import java.io.IOException;
+import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -18,18 +23,11 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffectType;
 
-import files.playerData;
-import files.playerFile;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.*;
-
-
-public class RPGSTAT extends JavaPlugin implements Listener {
-    private playerData playerData;
-    private playerFile playerFile;
-    private itemLore itemLore;
+public class RpgStat extends JavaPlugin implements Listener {
+    private PlayerData playerData;
+    private PlayerFile playerFile;
+    private ItemLore itemLore;
 
     //플러그인 활성화
     @Override
@@ -45,9 +43,9 @@ public class RPGSTAT extends JavaPlugin implements Listener {
             new File(getDataFolder(), "playerdata").mkdirs();
         }
 
-        this.playerData = new playerData(this);
-        this.playerFile = new playerFile(this);
-        this.itemLore = new itemLore(this);
+        this.playerData = new PlayerData(this);
+        this.playerFile = new PlayerFile(this);
+        this.itemLore = new ItemLore(this);
         saveDefaultConfig();
     }
 
@@ -66,19 +64,21 @@ public class RPGSTAT extends JavaPlugin implements Listener {
         File pf = new File(getDataFolder(), "playerdata/" + p.getUniqueId() + ".yml");
         FileConfiguration pFile = YamlConfiguration.loadConfiguration(pf);
 
-        if (e.getAmount() > 0) {
-            if (p.getExp() + e.getAmount() / (float) p.getExpToLevel() >= 1.0) {
-                UUID pID = p.getUniqueId();
+        if (e.getAmount() <= 0) {
+            return;
+        }
 
-                pFile.set(pID + ".statpoint", pFile.getInt(p.getUniqueId() + "." + "statpoint") + 1);
-                pFile.save(pf);
-                p.sendMessage(ChatColor.BOLD + "" + ChatColor.DARK_GREEN + "[" + ChatColor.GREEN + "STAT"
-                        + ChatColor.DARK_GREEN + "] " + ChatColor.RESET + "" + ChatColor.WHITE + "레벨업! 현재 "
-                        + p.getLevel() + "레벨 입니다 !");
-                p.sendMessage(ChatColor.BOLD + "" + ChatColor.DARK_GREEN + "[" + ChatColor.GREEN + "STAT"
-                        + ChatColor.DARK_GREEN + "] " + ChatColor.RESET + "" + ChatColor.WHITE + "보유 스텟 : " + pFile.get(
-                        pID + ".statpoint"));
-            }
+        if (p.getExp() + e.getAmount() / (float) p.getExpToLevel() >= 1.0) {
+            UUID pID = p.getUniqueId();
+
+            pFile.set(pID + ".statpoint", pFile.getInt(p.getUniqueId() + "." + "statpoint") + 1);
+            pFile.save(pf);
+            p.sendMessage(ChatColor.BOLD + "" + ChatColor.DARK_GREEN + "[" + ChatColor.GREEN + "STAT"
+                    + ChatColor.DARK_GREEN + "] " + ChatColor.RESET + ChatColor.WHITE + "레벨업! 현재 "
+                    + p.getLevel() + "레벨 입니다 !");
+            p.sendMessage(ChatColor.BOLD + "" + ChatColor.DARK_GREEN + "[" + ChatColor.GREEN + "STAT"
+                    + ChatColor.DARK_GREEN + "] " + ChatColor.RESET + ChatColor.WHITE + "보유 스텟 : " + pFile.get(
+                    pID + ".statpoint"));
         }
     }
 
@@ -231,7 +231,7 @@ public class RPGSTAT extends JavaPlugin implements Listener {
             if (Math.random() <= (Integer) playerFile.getPlayerFile(p, "attack") / 5 * Double.valueOf(
                     String.valueOf(getConfig().get("stats.luck.stat.치명타확률"))).doubleValue()) {
                 e.setDamage(e.getDamage() * 1.5);
-                p.sendMessage(messageHead() + ChatColor.YELLOW + "" + ChatColor.BOLD + "크리티컬 ! +" + e.getDamage());
+                p.sendMessage(messageHead() + ChatColor.YELLOW + ChatColor.BOLD + "크리티컬 ! +" + e.getDamage());
             }
         } else {
             e.setDamage(Math.round(e.getDamage() * 100) / 100);
@@ -267,7 +267,7 @@ public class RPGSTAT extends JavaPlugin implements Listener {
     //메시지 헤더--------------------------------------------------------------
     public String messageHead() {
         return ChatColor.BOLD + "" + ChatColor.DARK_GREEN + "[" + ChatColor.GREEN + "STAT" + ChatColor.DARK_GREEN + "] "
-                + ChatColor.RESET + "";
+                + ChatColor.RESET;
     }
 
     //플레이어 입력 오류 메시지--------------------------------------------------------------
