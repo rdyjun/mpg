@@ -14,18 +14,15 @@ import java.util.List;
 public class itemLore{
     private RPGSTAT RPGSTAT;
     private playerFile playerFile;
+
     public itemLore(RPGSTAT RPGSTAT){
         this.RPGSTAT = RPGSTAT;
         this.playerFile = new playerFile(RPGSTAT);
     }
-    public ItemStack StatInformation(Player p, String ItemName){
-        String head;
 
-        if(RPGSTAT.getConfig().contains("stats." + ItemName)){
-            head = "stats";
-        } else {
-            head = "info";
-        }
+    public ItemStack StatInformation(Player p, String itemName){
+        String head = getHead(itemName);
+
         Material material = Material.matchMaterial(String.valueOf(RPGSTAT.getConfig().get(head + "." + ItemName + "." + "material")));
         ChatColor chatColor = ChatColor.getByChar(String.valueOf(RPGSTAT.getConfig().get(head + "." + ItemName + "." + "color")));
         String statName = String.valueOf(RPGSTAT.getConfig().get(head + "." + ItemName + "." + "name"));
@@ -39,7 +36,7 @@ public class itemLore{
             //현재 레벨
             lore.add(ChatColor.GOLD + "현재 레벨 : " + playerFile.getPlayerFile(p, ItemName));
             //현재 레벨 설명----------
-            getNowLevelLore(p, ItemName, lore);
+            getNowLevelLore(p, ItemName, lore);q
             //--------------------------
             //다음 레벨
             if((Integer)(playerFile.getPlayerFile(p, ItemName)) < (Integer)RPGSTAT.getConfig().get("setting.max")){
@@ -94,6 +91,15 @@ public class itemLore{
 
         return stat;
     }
+
+    private String getHead(String ItemName) {
+        if (RPGSTAT.getConfig().contains("stats." + ItemName)){
+            return "stats";
+        }
+
+        return "info";
+    }
+
     //각 레벨 별 설명
     public void getNowLevelLore(Player p, String ItemName, List<String> lore){
         //stat == 100%기준 배율 증가 - 공격력, 치명타 데미지, 이동속도, 공격속도
