@@ -16,26 +16,27 @@ public class PlayerFile {
         PlayerFile.rpgStat = rpgStat;
     }
 
+
     /**
      * 플레이어 파일 생성
      *
      * @param player
      */
     public static void createFile(Player player) {
-        File file = getFile(player);
-        FileConfiguration config = getConfig(player);
-
         if (existPlayerFile(player)) {
             return;
         }
 
-        try {
-            file.createNewFile();
+        File file = getFile(player);
+        FileConfiguration config = getConfig(player);
 
+        try {
             for (String statName : rpgStat.getConfig().getConfigurationSection("stats").getKeys(false)) {
-                setPlayerFile(player, statName, 0);
+                config.set(player.getUniqueId() + "." + statName, 0);
             }
-            setPlayerFile(player, "statpoint", 0);
+            config.set(player.getUniqueId() + ".statpoint", 0);
+
+            config.save(file);
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -52,7 +53,12 @@ public class PlayerFile {
     public static Object getPlayerFile(Player player, String statName) {
         FileConfiguration config = getConfig(player);
 
-        return config.get(player.getUniqueId() + "." + statName);
+        Object result = config.get(player.getUniqueId() + "." + statName);
+
+        if (result == null) {
+            throw new IllegalArgumentException("플레이어 파일에 " + statName + " 스텟이 존재하지 않습니다.");
+        }
+        return result;
     }
 
     /**

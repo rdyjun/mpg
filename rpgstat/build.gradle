@@ -30,6 +30,12 @@ tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
 }
 
+tasks.withType(ProcessResources).configureEach {
+    filteringCharset = 'UTF-8'
+    filesMatching('**/*.yml') {
+    }
+}
+
 processResources {
     filesMatching('**/*.yml') {
         expand(version: pluginVersion, name: pluginName)
