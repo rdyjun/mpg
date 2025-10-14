@@ -72,7 +72,6 @@ public class PlayerFile {
         FileConfiguration config = getConfig(player);
 
         config.set(player.getUniqueId() + "." + statName, value);
-        savePlayerFile(player);
     }
 
     public static Set<String> getPlayerKeys(Player p) {  //플레이어 파일 키값 가져오기

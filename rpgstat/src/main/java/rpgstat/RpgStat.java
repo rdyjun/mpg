@@ -96,8 +96,6 @@ public class RpgStat extends JavaPlugin implements Listener {
 
         //플레이어 파일 생성
         PlayerFile.createFile(player);
-        //플레이어 체력 설정
-        playerPatience(player);
         agility.init(player);
         vitality.init(player);
         damage.init(player);
@@ -166,8 +164,6 @@ public class RpgStat extends JavaPlugin implements Listener {
                         for (String b : PlayerFile.getPlayerKeys(a)) {
                             PlayerFile.setPlayerFile(a, b, 0);
                         }
-                        //체력 재설정
-                        playerPatience(a);
                         p.sendMessage(messageHead() + ChatColor.WHITE + "[" + a.getName()
                                 + "] 님의 레벨(스텟)을 초기화시켰습니다 !");
                     } else {
@@ -207,8 +203,6 @@ public class RpgStat extends JavaPlugin implements Listener {
                     for (String b : PlayerFile.getPlayerKeys(p)) {
                         PlayerFile.setPlayerFile(a, b, 0);
                     }
-                    //체력 재설정
-                    playerPatience(a);
                     //스텟 포인트 설정
                     PlayerFile.setPlayerFile(a, "statpoint", Integer.parseInt(args[2]));
                     p.sendMessage(messageHead() + ChatColor.WHITE + "[" + a.getName()
@@ -238,22 +232,29 @@ public class RpgStat extends JavaPlugin implements Listener {
         }
         //클릭한 아이템에 따른 작동
         event.setCancelled(true);
+
+        String eventName = event.getCurrentItem().getItemMeta().getDisplayName();
+
         for (String statName : getConfig().getConfigurationSection("stats").getKeys(false)) {
-            if (event.getCurrentItem().getItemMeta().getDisplayName()
-                    .contains(String.valueOf(getConfig().get("stats" + "." + statName + "." + "name")))) {
-                playerData.statUp(player, statName);
-                player.openInventory(inv(player));
+            System.out.println(statName + " :: " + eventName + " :: ");
+            System.out.println("stats." + statName + ".name");
+            String displayName = getConfig().getString("stats." + statName + ".name");
+            System.out.println(displayName);
+            if (!eventName.contains(displayName)) {
+                System.out.println(1);
+                continue;
             }
+            System.out.println(2);
+
+            playerData.statUp(player, statName);
+            player.openInventory(inv(player));
 
             if (statName.contains("agility")) {
                 agility.increase(player);
             }
 
-            if (statName.contains("patience")) {
-                playerPatience(player);
-            }
-
             if (statName.contains("vitality")) {
+                System.out.println(3);
                 vitality.increase(player);
             }
         }
@@ -276,11 +277,6 @@ public class RpgStat extends JavaPlugin implements Listener {
 
         e.setDamage(power);
         p.sendMessage(String.valueOf(e.getDamage()));
-    }
-
-    public void playerPatience(Player p) {
-        p.setHealthScale(20 + (Integer) PlayerFile.getPlayerFile(p, "patience") * Integer.parseInt(
-                String.valueOf(getConfig().get("stats.patience.statpls.체력"))));
     }
 
     //플레이어 크리티컬 여부 확인-------------------------------------

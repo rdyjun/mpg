@@ -1,6 +1,9 @@
 package files;
 
+import java.io.File;
+import java.io.IOException;
 import org.bukkit.ChatColor;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import rpgstat.RpgStat;
 
@@ -31,8 +34,15 @@ public class PlayerData {
 
         int statLevel = (Integer) PlayerFile.getPlayerFile(player, statName);
 
-        PlayerFile.setPlayerFile(player, statName, statLevel + 1); // 스텟 증가
-        PlayerFile.setPlayerFile(player, STAT_POINT_NAME, statPoint - 1); // 스텟 포인트 소모
+        File file = PlayerFile.getFile(player);
+        FileConfiguration config = PlayerFile.getConfig(player);
+        config.set(player.getUniqueId() + "." + statName, statLevel + 1);
+        config.set(player.getUniqueId() + "." + STAT_POINT_NAME, statPoint - 1);
+        try {
+            config.save(file);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         PlayerFile.savePlayerFile(player);
 
         ChatColor statColor = getStatColor(statName);

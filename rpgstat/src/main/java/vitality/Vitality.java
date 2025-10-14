@@ -18,9 +18,11 @@ public class Vitality extends Stat {
         String healthKeyName = KeyNameGenerator.getKey(STAT_NAME, HEALTH_STAT_NAME);
 
         double healthStatOption = rpgStat.getConfig().getDouble(healthKeyName);
-        double playerHealth = (double) PlayerFile.getPlayerFile(player, STAT_NAME);
+        Integer playerHealthLevel = (Integer) PlayerFile.getPlayerFile(player, STAT_NAME);
+        double playerHealth = player.getHealthScale();
 
-        double updatedHealth = healthStatOption + playerHealth;
+        double updatedHealth = playerHealth + (healthStatOption * playerHealthLevel);
+        System.out.println(updatedHealth);
 
         player.setHealthScale(updatedHealth);
 
