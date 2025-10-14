@@ -95,8 +95,8 @@ public class RpgStat extends JavaPlugin implements Listener {
         PlayerFile.createFile(player);
         //플레이어 체력 설정
         playerPatience(player);
-        agility.initAgility(player);
-        vitality.initVitality(player);
+        agility.init(player);
+        vitality.init(player);
     }
 
     //스텟창 설정 ----------------------------
@@ -242,7 +242,7 @@ public class RpgStat extends JavaPlugin implements Listener {
             }
 
             if (statName.contains("agility")) {
-                agility.updateAgility(player);
+                agility.increase(player);
             }
 
             if (statName.contains("patience")) {
@@ -250,7 +250,7 @@ public class RpgStat extends JavaPlugin implements Listener {
             }
 
             if (statName.contains("vitality")) {
-                vitality.updateVitality(player);
+                vitality.increase(player);
             }
         }
     }

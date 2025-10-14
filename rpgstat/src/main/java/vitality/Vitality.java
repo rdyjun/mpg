@@ -3,20 +3,18 @@ package vitality;
 import files.PlayerFile;
 import namegenerator.KeyNameGenerator;
 import org.bukkit.entity.Player;
-import rpgstat.RpgStat;
+import rpgstat.Stat;
 
-public class Vitality {
+public class Vitality extends Stat {
 
     private static final String STAT_NAME = "vitality";
     private static final String HEALTH_STAT_NAME = "health";
 
-    private final RpgStat rpgStat;
-
-    public Vitality(RpgStat rpgStat) {
-        this.rpgStat = rpgStat;
+    public Vitality(rpgstat.RpgStat rpgStat) {
+        super(rpgStat);
     }
 
-    public void updateVitality(Player player) {
+    public void increase(Player player) {
         String healthKeyName = KeyNameGenerator.getKey(STAT_NAME, HEALTH_STAT_NAME);
 
         double healthStatOption = rpgStat.getConfig().getDouble(healthKeyName);
@@ -29,7 +27,7 @@ public class Vitality {
         PlayerFile.setPlayerFile(player, "vitality", updatedHealth);
     }
 
-    public void initVitality(Player player) {
+    public void init(Player player) {
         double playerHealth = (double) PlayerFile.getPlayerFile(player, STAT_NAME);
 
         player.setHealthScale(playerHealth);

@@ -3,20 +3,18 @@ package agility;
 import files.PlayerFile;
 import namegenerator.KeyNameGenerator;
 import org.bukkit.entity.Player;
-import rpgstat.RpgStat;
+import rpgstat.Stat;
 
-public class Agility {
+public class Agility extends Stat {
 
     private static final String STAT_NAME = "agility";
     private static final String SPEED_STAT_NAME = "speed";
 
-    private static RpgStat rpgStat;
-
-    public Agility(RpgStat rpgStat) {
-        Agility.rpgStat = rpgStat;
+    public Agility(rpgstat.RpgStat rpgStat) {
+        super(rpgStat);
     }
 
-    public void updateAgility(Player player) {
+    public void increase(Player player) {
         String speedKeyName = KeyNameGenerator.getKey(STAT_NAME, SPEED_STAT_NAME);
 
         float speedStatOption = (float) rpgStat.getConfig().getDouble(speedKeyName);
@@ -30,7 +28,7 @@ public class Agility {
         PlayerFile.setPlayerFile(player, STAT_NAME + "." + SPEED_STAT_NAME, updatedSpeed);
     }
 
-    public void initAgility(Player player) {
+    public void init(Player player) {
         float speed = (float) PlayerFile.getPlayerFile(player, KeyNameGenerator.getKey(STAT_NAME, SPEED_STAT_NAME));
 
         player.setWalkSpeed(speed);
