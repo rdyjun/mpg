@@ -1,6 +1,6 @@
 name: CUSTOMITEM
 version: '${project.version}'
-main: customitem.CUSTOMITEM
+main: customitem.CustomItem
 
 commands:
   customitem:
