@@ -1,5 +1,6 @@
 package rpgstat;
 
+import agility.Agility;
 import files.PlayerData;
 import files.PlayerFile;
 import java.io.File;
@@ -22,12 +23,13 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffectType;
+import vitality.Vitality;
 
 
 public class RpgStat extends JavaPlugin implements Listener {
     private PlayerData playerData;
-    private PlayerFile playerFile;
     private ItemLore itemLore;
+    private Agility agility;
 
     //플러그인 활성화
     @Override
@@ -44,8 +46,8 @@ public class RpgStat extends JavaPlugin implements Listener {
         }
 
         this.playerData = new PlayerData(this);
-        this.playerFile = new PlayerFile(this);
         this.itemLore = new ItemLore(this);
+        this.agility = new Agility(this);
         saveDefaultConfig();
     }
 
@@ -84,14 +86,14 @@ public class RpgStat extends JavaPlugin implements Listener {
 
     //처음 접속했을 때
     @EventHandler
-    public void newPlayer(PlayerJoinEvent e) {
-        Player p = e.getPlayer();
+    public void newPlayer(PlayerJoinEvent event) {
+        Player player = event.getPlayer();
 
         //플레이어 파일 생성
-        PlayerFile.createFile(p);
+        PlayerFile.createFile(player);
         //플레이어 체력 설정
-        playerPatience(p);
-        playerAgility(p);
+        playerPatience(player);
+        agility.initAgility(player);
     }
 
     //스텟창 설정 ----------------------------
@@ -221,25 +223,31 @@ public class RpgStat extends JavaPlugin implements Listener {
 
     //스텟 창 내 버튼 기능---------------------------------------------------------
     @EventHandler
-    public void ivClick(InventoryClickEvent e) {
-        Player p = (Player) e.getWhoClicked();
+    public void ivClick(InventoryClickEvent event) {
+        Player player = (Player) event.getWhoClicked();
         //열려있는(스텟) 인벤토리
-        if (!e.getView().getTitle().contains("스텟") || e.getCurrentItem() == null) {
+        if (!event.getView().getTitle().contains("스텟") || event.getCurrentItem() == null) {
             return;
         }
         //클릭한 아이템에 따른 작동
-        e.setCancelled(true);
-        for (String a : getConfig().getConfigurationSection("stats").getKeys(false)) {
-            if (e.getCurrentItem().getItemMeta().getDisplayName()
-                    .contains(String.valueOf(getConfig().get("stats" + "." + a + "." + "name")))) {
-                playerData.statUp(p, a);
-                p.openInventory(inv(p));
+        event.setCancelled(true);
+        for (String statName : getConfig().getConfigurationSection("stats").getKeys(false)) {
+            if (event.getCurrentItem().getItemMeta().getDisplayName()
+                    .contains(String.valueOf(getConfig().get("stats" + "." + statName + "." + "name")))) {
+                playerData.statUp(player, statName);
+                player.openInventory(inv(player));
             }
-            if (a.contains("agility") && (Integer) PlayerFile.getPlayerFile(p, "agility") <= 50) {
-                playerAgility(p);
+
+            if (statName.contains("agility")) {
+                agility.updateAgility(player);
             }
-            if (a.contains("patience") && (Integer) PlayerFile.getPlayerFile(p, "patience") <= 50) {
-                playerPatience(p);
+
+            if (statName.contains("patience")) {
+                playerPatience(player);
+            }
+
+            if (statName.contains("vitality")) {
+                Vitality.updateVitality(player);
             }
         }
     }
@@ -266,15 +274,6 @@ public class RpgStat extends JavaPlugin implements Listener {
     public void playerPatience(Player p) {
         p.setHealthScale(20 + (Integer) PlayerFile.getPlayerFile(p, "patience") * Integer.parseInt(
                 String.valueOf(getConfig().get("stats.patience.statpls.체력"))));
-    }
-
-    public void playerAgility(Player p) {
-        p.setWalkSpeed(
-                0.2f + Float.parseFloat(String.valueOf(PlayerFile.getPlayerFile(p, "agility"))) * Float.parseFloat(
-                        String.valueOf(getConfig().get("stats.agility.stat.이동속도"))));
-        p.setFlySpeed(
-                0.2f + Float.parseFloat(String.valueOf(PlayerFile.getPlayerFile(p, "agility"))) * Float.parseFloat(
-                        String.valueOf(getConfig().get("stats.agility.stat.이동속도"))));
     }
 
     //플레이어 크리티컬 여부 확인-------------------------------------
