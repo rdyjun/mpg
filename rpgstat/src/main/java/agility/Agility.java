@@ -7,6 +7,7 @@ import rpgstat.Stat;
 
 public class Agility extends Stat {
 
+    private static final Float DEFAULT_SPEED = 0.2f;
     private static final String STAT_NAME = "agility";
     private static final String SPEED_STAT_NAME = "speed";
 
@@ -15,13 +16,12 @@ public class Agility extends Stat {
     }
 
     public void increase(Player player) {
-        String agilityKeyName = KeyNameGenerator.getKey(STAT_NAME, STAT_NAME);
+        String agilityKeyName = KeyNameGenerator.getKey(STAT_NAME, SPEED_STAT_NAME);
 
         float agilityStatOption = (float) rpgStat.getConfig().getDouble(agilityKeyName);
-        float playerAgilityStat = (Integer) PlayerFile.getPlayerFile(player, STAT_NAME);
-        float playerSpeed = player.getWalkSpeed();
+        int playerAgilityLevel = (Integer) PlayerFile.getPlayerFile(player, STAT_NAME);
 
-        float updatedSpeed = playerSpeed + (playerAgilityStat * agilityStatOption);
+        float updatedSpeed = DEFAULT_SPEED + (playerAgilityLevel * agilityStatOption);
 
         player.setWalkSpeed(updatedSpeed);
         player.setFlySpeed(updatedSpeed);
