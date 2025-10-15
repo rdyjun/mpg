@@ -2,11 +2,13 @@ package agility;
 
 import files.PlayerFile;
 import namegenerator.KeyNameGenerator;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import rpgstat.Stat;
 
 public class Agility extends Stat {
 
+    public static final String TYPE = "agility";
     private static final Float DEFAULT_SPEED = 0.2f;
     private static final String STAT_NAME = "agility";
     private static final String SPEED_STAT_NAME = "speed";
@@ -30,5 +32,12 @@ public class Agility extends Stat {
 
     public void init(Player player) {
         increase(player);
+    }
+
+    public String getNextLevelLore(Player player, String statName) {
+        Integer statLevel = ((Integer) PlayerFile.getPlayerFile(player, statName) + 1);
+        Double statOption = rpgStat.getConfig().getDouble(
+                KeyNameGenerator.getKey(statName, SPEED_STAT_NAME));
+        return ChatColor.WHITE + "최종 속도가 " + ChatColor.GREEN + (statLevel * statOption) + ChatColor.WHITE + " 만큼 증가합니다.";
     }
 }

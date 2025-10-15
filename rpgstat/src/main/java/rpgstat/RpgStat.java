@@ -31,9 +31,9 @@ import vitality.Vitality;
 public class RpgStat extends JavaPlugin implements Listener {
     private PlayerData playerData;
     private ItemLore itemLore;
-    private Agility agility;
-    private Vitality vitality;
-    private Attack attack;
+    protected Agility agility;
+    protected Vitality vitality;
+    protected Attack attack;
 
     //플러그인 활성화
     @Override
@@ -49,11 +49,13 @@ public class RpgStat extends JavaPlugin implements Listener {
             new File(getDataFolder(), "playerdata").mkdirs();
         }
 
+        PlayerFile.init(this);
         this.playerData = new PlayerData(this);
-        this.itemLore = new ItemLore(this);
         this.agility = new Agility(this);
         this.vitality = new Vitality(this);
         this.attack = new Attack(this);
+
+        this.itemLore = new ItemLore(this);
         saveDefaultConfig();
     }
 
@@ -110,10 +112,10 @@ public class RpgStat extends JavaPlugin implements Listener {
         Inventory inv = Bukkit.createInventory(null, (Integer) getConfig().get("setting.size"), "스텟");
         inv.setMaxStackSize(100);
         for (String s : getConfig().getConfigurationSection("info").getKeys(false)) {
-            inv.setItem(getConfig().getInt("info." + s + ".position"), itemLore.StatInformation(p, s));
+            inv.setItem(getConfig().getInt("info." + s + ".position"), itemLore.generate(p, s));
         }
         for (String s : getConfig().getConfigurationSection("stats").getKeys(false)) {
-            inv.setItem(getConfig().getInt("stats." + s + ".position"), itemLore.StatInformation(p, s));
+            inv.setItem(getConfig().getInt("stats." + s + ".position"), itemLore.generate(p, s));
         }
         p.openInventory(inv);
         return inv;

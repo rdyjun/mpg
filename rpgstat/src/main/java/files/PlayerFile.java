@@ -12,10 +12,9 @@ public class PlayerFile {
 
     private static RpgStat rpgStat;
 
-    public PlayerFile(RpgStat rpgStat) {
+    public static void init(RpgStat rpgStat) {
         PlayerFile.rpgStat = rpgStat;
     }
-
 
     /**
      * 플레이어 파일 생성
