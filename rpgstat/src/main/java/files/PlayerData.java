@@ -23,13 +23,13 @@ public class PlayerData {
      * @param player
      * @param statName
      */
-    synchronized public void statUp(Player player, String statName) {
+    synchronized public boolean statUp(Player player, String statName) {
         int statPoint = (Integer) PlayerFile.getPlayerFile(player, STAT_POINT_NAME);
 
         // 스텟 포인트가 없을 때 종료
         if (statPoint <= 0) {
             player.sendMessage(rpgStat.messageHead() + ChatColor.RED + "스텟 포인트가 부족합니다 !");
-            return;
+            return false;
         }
 
         int statLevel = (Integer) PlayerFile.getPlayerFile(player, statName);
@@ -55,6 +55,8 @@ public class PlayerData {
                         + (stat + 1) + " 스텟 상승!";
 
         player.sendMessage(message);
+
+        return true;
     }
 
     public ChatColor getStatColor(String statName) {

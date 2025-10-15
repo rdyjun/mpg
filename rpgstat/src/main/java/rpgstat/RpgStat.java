@@ -244,7 +244,13 @@ public class RpgStat extends JavaPlugin implements Listener {
                 continue;
             }
 
-            playerData.statUp(player, statName);
+            boolean isFailed = !playerData.statUp(player, statName);
+            player.openInventory(inv(player));
+
+            if (isFailed) {
+                return;
+            }
+
             player.openInventory(inv(player));
 
             if (statName.contains("agility")) {
