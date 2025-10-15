@@ -265,6 +265,10 @@ public class RpgStat extends JavaPlugin implements Listener {
 
     @EventHandler
     public void playerAttack(EntityDamageByEntityEvent e) {
+        if (!(e.getDamager() instanceof Player)) {
+            return;
+        }
+
         Player p = (Player) e.getDamager();
         double additionalDamage = this.attack.getAdditionalDamage(p);
         double damage = e.getDamage() + additionalDamage;
