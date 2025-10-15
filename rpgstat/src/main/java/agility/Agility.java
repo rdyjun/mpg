@@ -15,23 +15,19 @@ public class Agility extends Stat {
     }
 
     public void increase(Player player) {
-        String speedKeyName = KeyNameGenerator.getKey(STAT_NAME, SPEED_STAT_NAME);
+        String agilityKeyName = KeyNameGenerator.getKey(STAT_NAME, STAT_NAME);
 
-        float speedStatOption = (float) rpgStat.getConfig().getDouble(speedKeyName);
-        float playerSpeed = (Integer) PlayerFile.getPlayerFile(player, SPEED_STAT_NAME);
+        float agilityStatOption = (float) rpgStat.getConfig().getDouble(agilityKeyName);
+        float playerAgilityStat = (Integer) PlayerFile.getPlayerFile(player, STAT_NAME);
+        float playerSpeed = player.getWalkSpeed();
 
-        float updatedSpeed = playerSpeed + speedStatOption;
+        float updatedSpeed = playerSpeed + (playerAgilityStat * agilityStatOption);
 
         player.setWalkSpeed(updatedSpeed);
         player.setFlySpeed(updatedSpeed);
-
-        PlayerFile.setPlayerFile(player, STAT_NAME + "." + SPEED_STAT_NAME, updatedSpeed);
     }
 
     public void init(Player player) {
-        float speed = (float) PlayerFile.getPlayerFile(player, KeyNameGenerator.getKey(STAT_NAME, SPEED_STAT_NAME));
-
-        player.setWalkSpeed(speed);
-        player.setFlySpeed(speed);
+        increase(player);
     }
 }

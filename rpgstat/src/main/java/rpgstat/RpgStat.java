@@ -1,7 +1,8 @@
 package rpgstat;
 
 import agility.Agility;
-import damage.Damage;
+import attack.Attack;
+import attack.Attack;
 import files.PlayerData;
 import files.PlayerFile;
 import java.io.File;
@@ -32,7 +33,7 @@ public class RpgStat extends JavaPlugin implements Listener {
     private ItemLore itemLore;
     private Agility agility;
     private Vitality vitality;
-    private Damage damage;
+    private Attack attack;
 
     //플러그인 활성화
     @Override
@@ -52,7 +53,7 @@ public class RpgStat extends JavaPlugin implements Listener {
         this.itemLore = new ItemLore(this);
         this.agility = new Agility(this);
         this.vitality = new Vitality(this);
-        this.damage = new Damage(this);
+        this.attack = new Attack(this);
         saveDefaultConfig();
     }
 
@@ -98,7 +99,6 @@ public class RpgStat extends JavaPlugin implements Listener {
         PlayerFile.createFile(player);
         agility.init(player);
         vitality.init(player);
-        damage.init(player);
     }
 
     //스텟창 설정 ----------------------------
@@ -236,15 +236,10 @@ public class RpgStat extends JavaPlugin implements Listener {
         String eventName = event.getCurrentItem().getItemMeta().getDisplayName();
 
         for (String statName : getConfig().getConfigurationSection("stats").getKeys(false)) {
-            System.out.println(statName + " :: " + eventName + " :: ");
-            System.out.println("stats." + statName + ".name");
             String displayName = getConfig().getString("stats." + statName + ".name");
-            System.out.println(displayName);
             if (!eventName.contains(displayName)) {
-                System.out.println(1);
                 continue;
             }
-            System.out.println(2);
 
             playerData.statUp(player, statName);
             player.openInventory(inv(player));
@@ -254,7 +249,6 @@ public class RpgStat extends JavaPlugin implements Listener {
             }
 
             if (statName.contains("vitality")) {
-                System.out.println(3);
                 vitality.increase(player);
             }
         }
@@ -263,19 +257,17 @@ public class RpgStat extends JavaPlugin implements Listener {
     @EventHandler
     public void playerAttack(EntityDamageByEntityEvent e) {
         Player p = (Player) e.getDamager();
-        Integer power = (Integer) PlayerFile.getPlayerFile(p, "attack");
-        Double criticalHitChange = (Double) PlayerFile.getPlayerFile(p, "critical-hit-chance");
+        Double damage = this.attack.getDamage(p);
 
-        boolean isCritical = isCritical(p) || Math.random() <= criticalHitChange;
+        boolean isCritical = isCritical(p);
         if (isCritical) {
-            Double criticalHitMultiple = (Double) PlayerFile.getPlayerFile(p, "critical-hit-multiple");
-            e.setDamage(power * criticalHitMultiple);
+            e.setDamage(damage * 1.5);
             p.sendMessage(messageHead() + ChatColor.YELLOW + ChatColor.BOLD + "크리티컬 ! +" + e.getDamage());
 
             return;
         }
 
-        e.setDamage(power);
+        e.setDamage(damage);
         p.sendMessage(String.valueOf(e.getDamage()));
     }
 

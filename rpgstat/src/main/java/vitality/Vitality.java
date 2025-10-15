@@ -22,16 +22,11 @@ public class Vitality extends Stat {
         double playerHealth = player.getHealthScale();
 
         double updatedHealth = playerHealth + (healthStatOption * playerHealthLevel);
-        System.out.println(updatedHealth);
 
         player.setHealthScale(updatedHealth);
-
-        PlayerFile.setPlayerFile(player, "vitality", updatedHealth);
     }
 
     public void init(Player player) {
-        double playerHealth = (double) PlayerFile.getPlayerFile(player, STAT_NAME);
-
-        player.setHealthScale(playerHealth);
+        increase(player);
     }
 }
