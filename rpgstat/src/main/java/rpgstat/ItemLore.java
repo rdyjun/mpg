@@ -40,7 +40,7 @@ public class ItemLore {
             getNowLevelLore(p, itemName, lore);
             //--------------------------
             //다음 레벨
-            if ((Integer) (playerFile.getPlayerFile(p, itemName)) < (Integer) rpgStat.getConfig().get("setting.max")) {
+            if ((Integer) (playerFile.getPlayerFile(p, itemName)) < (Integer) rpgStat.getConfig().get(head + "." + itemName + ".max-level")) {
                 lore.add(ChatColor.DARK_PURPLE + "다음 레벨 : " + ((Integer) (playerFile.getPlayerFile(p, itemName)) + 1));
             } else {
                 lore.add(ChatColor.DARK_PURPLE + "다음 레벨 : MAX");

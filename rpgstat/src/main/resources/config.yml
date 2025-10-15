@@ -1,5 +1,5 @@
 setting:
-  max: 50
+  max: 100
   size: 9
 info:
   reset:
@@ -14,6 +14,7 @@ info:
       statup:
         - "&a소모 : 5,000EL"
     position: 8
+    max-level: 0
 
   statpoint:
     type: "statpoint"
@@ -26,6 +27,7 @@ info:
         - "&7스텟 투자로      "
         - "&7강해지세요 !     "
     position: 0
+    max-level: 0
 
   statinfo1:
     type: "statinfo"
@@ -37,6 +39,7 @@ info:
       itemlore:
         - ""
     position: 1
+    max-level: 0
 
   statinfo2:
     type: "statinfo"
@@ -48,6 +51,7 @@ info:
       itemlore:
         - ""
     position: 7
+    max-level: 0
 
 
 stats:
@@ -62,7 +66,9 @@ stats:
         - "클릭 시 체력이 1 증가합니다."
     amount:
       health: 1
-    position: 2
+    position: 1
+    max-level: 100
+
   attack:
     type: "stat"
     material: IRON_SWORD
@@ -75,7 +81,8 @@ stats:
     amount:
       damage: 0.25
       critical-damage: 0.1
-    position: 3
+    position: 2
+    max-level: 100
 
   patience:
     type: "stat"
@@ -89,7 +96,8 @@ stats:
     amount:
       defence: 2
       hungry: 2
-    position: 4
+    position: 3
+    max-level: 100
 
   agility:
     type: "stat"
@@ -103,7 +111,8 @@ stats:
     amount:
       speed: 0.005
       evasion: 0.01
-    position: 5
+    position: 4
+    max-level: 160
 
   luck:
     type: "stat"
@@ -116,7 +125,8 @@ stats:
         - "클릭 시 해당 스텟을 올립니다"
     amount:
       luck: 3
-    position: 6
+    position: 5
+    max-level: 100
 
   proficiency:
     type: "stat"
@@ -129,14 +139,15 @@ stats:
         - "클릭 시 해당 스텟을 올립니다"
     amount:
       exp-probability: 1
+    position: 6
+    max-level: 100
+
+  magic-engineering:
+    type: "stat"
+    material: ENDER_PEARL
+    name: "마법공학"
+    color: d
+    lore:
+      itemlore: "&d희귀 인챈트 &f확률 증가 스텟"
     position: 7
-
-    magic-engineering:
-      type: "stat"
-      meterial: ENDER_PEARL
-      name: "마법공학"
-      color: d
-      lore:
-        itemlore: "&d희귀 인챈트 &f확률 증가 스텟"
-
-      position: 8
+    max-level: 100

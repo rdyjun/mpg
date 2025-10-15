@@ -21,7 +21,8 @@ public class Agility extends Stat {
         float agilityStatOption = (float) rpgStat.getConfig().getDouble(agilityKeyName);
         int playerAgilityLevel = (Integer) PlayerFile.getPlayerFile(player, STAT_NAME);
 
-        float updatedSpeed = DEFAULT_SPEED + (playerAgilityLevel * agilityStatOption);
+        // 최대 1.0f 까지 속도 증가
+        float updatedSpeed = Math.min(1f, DEFAULT_SPEED + (playerAgilityLevel * agilityStatOption));
 
         player.setWalkSpeed(updatedSpeed);
         player.setFlySpeed(updatedSpeed);

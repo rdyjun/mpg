@@ -33,6 +33,11 @@ public class PlayerData {
         }
 
         int statLevel = (Integer) PlayerFile.getPlayerFile(player, statName);
+        int maxLevel = rpgStat.getConfig().getInt("stats." + statName + ".max-level");
+        if (statLevel >= maxLevel) {
+            player.sendMessage(rpgStat.messageHead() + ChatColor.RED + "최대 레벨에 도달했습니다 !");
+            return false;
+        }
 
         File file = PlayerFile.getFile(player);
         FileConfiguration config = PlayerFile.getConfig(player);
