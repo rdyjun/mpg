@@ -269,7 +269,6 @@ public class RpgStat extends JavaPlugin implements Listener {
         }
 
         e.setDamage(damage);
-        p.sendMessage(String.valueOf(e.getDamage()));
     }
 
     //플레이어 크리티컬 여부 확인-------------------------------------
