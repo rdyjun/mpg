@@ -7,6 +7,7 @@ import rpgstat.Stat;
 
 public class Vitality extends Stat {
 
+    private static final Double BASE_HEALTH = 20d;
     private static final String STAT_NAME = "vitality";
     private static final String HEALTH_STAT_NAME = "health";
 
@@ -19,9 +20,8 @@ public class Vitality extends Stat {
 
         double healthStatOption = rpgStat.getConfig().getDouble(healthKeyName);
         Integer playerHealthLevel = (Integer) PlayerFile.getPlayerFile(player, STAT_NAME);
-        double playerHealth = player.getHealthScale();
 
-        double updatedHealth = playerHealth + (healthStatOption * playerHealthLevel);
+        double updatedHealth = BASE_HEALTH + (healthStatOption * playerHealthLevel);
 
         player.setHealthScale(updatedHealth);
     }
