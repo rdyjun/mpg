@@ -84,18 +84,18 @@ stats:
     position: 2
     max-level: 100
 
-  patience:
+  abundance:
     type: "stat"
     material: TOTEM
-    name: "인내"
+    name: "풍요"
     color: 6
     lore:
-      itemlore: "방어력 증가 스텟"
+      itemlore: "아이템 획득량 증가 스텟"
       statup:
         - "클릭 시 해당 스텟을 올립니다"
     amount:
-      defence: 2
-      hungry: 2
+      chance: 1
+      amount: 2
     position: 3
     max-level: 100
 
@@ -124,7 +124,7 @@ stats:
       statup:
         - "클릭 시 해당 스텟을 올립니다"
     amount:
-      luck: 3
+      chance: 0.8
     position: 5
     max-level: 100
 

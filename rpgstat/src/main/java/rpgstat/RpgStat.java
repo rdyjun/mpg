@@ -1,5 +1,6 @@
 package rpgstat;
 
+import abundance.Abundance;
 import agility.Agility;
 import attack.Attack;
 import attack.Attack;
@@ -7,9 +8,14 @@ import files.PlayerData;
 import files.PlayerFile;
 import java.io.File;
 import java.io.IOException;
+import java.util.Random;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
+import luck.Luck;
+import namegenerator.KeyNameGenerator;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -18,11 +24,13 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerExpChangeEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffectType;
 import vitality.Vitality;
@@ -34,6 +42,7 @@ public class RpgStat extends JavaPlugin implements Listener {
     protected Agility agility;
     protected Vitality vitality;
     protected Attack attack;
+    protected Luck luck;
 
     //플러그인 활성화
     @Override
@@ -54,6 +63,7 @@ public class RpgStat extends JavaPlugin implements Listener {
         this.agility = new Agility(this);
         this.vitality = new Vitality(this);
         this.attack = new Attack(this);
+        this.luck = new Luck();
 
         this.itemLore = new ItemLore(this);
         saveDefaultConfig();
@@ -90,6 +100,38 @@ public class RpgStat extends JavaPlugin implements Listener {
                     + ChatColor.DARK_GREEN + "] " + ChatColor.RESET + ChatColor.WHITE + "보유 스텟 : " + pFile.get(
                     pID + ".statpoint"));
         }
+    }
+
+    @EventHandler
+    public void onLuck(BlockBreakEvent e) {
+        Player player = e.getPlayer();
+        Integer stat = (Integer) PlayerFile.getPlayerFile(player, "luck");
+        int amount = stat / 15;
+        Double chance = getConfig().getDouble(KeyNameGenerator.getKey("luck", "chance")) * stat;
+
+        System.out.println("캠");
+        if (!luck.isAppliedBlock(e.getBlock())) {
+            System.out.println("이 블록 아님");
+            return;
+        }
+        System.out.println(e.getBlock().getType().toString());
+
+        int chanceResult = ThreadLocalRandom.current().nextInt(80);
+        System.out.println(chanceResult + " :: " + stat + " :: " + chance + " :: " + amount);
+        if (chanceResult > chance) {
+            return;
+        }
+
+        int lastAmount = (int) (chanceResult / (chance / amount));
+        player.sendMessage("" + ChatColor.GREEN.toString() + ChatColor.BOLD.toString() + lastAmount + ChatColor.WHITE + "개 추가 획득 !");
+
+        e.getBlock().getDrops().forEach(item -> {
+            Location dropLocation = e.getBlock().getLocation();
+            ItemStack dropItem = new ItemStack(item.getType(), lastAmount);
+            e.getBlock()
+                    .getWorld()
+                    .dropItemNaturally(dropLocation, dropItem);
+        });
     }
 
     //처음 접속했을 때
