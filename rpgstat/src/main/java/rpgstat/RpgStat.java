@@ -63,7 +63,7 @@ public class RpgStat extends JavaPlugin implements Listener {
         this.agility = new Agility(this);
         this.vitality = new Vitality(this);
         this.attack = new Attack(this);
-        this.luck = new Luck();
+        this.luck = new Luck(this);
 
         this.itemLore = new ItemLore(this);
         saveDefaultConfig();
@@ -115,20 +115,20 @@ public class RpgStat extends JavaPlugin implements Listener {
                 .getType();
 
         Integer stat = (Integer) PlayerFile.getPlayerFile(player, "luck");
-        int amount = stat / 15;
-        Double chance = getConfig().getDouble(KeyNameGenerator.getKey("luck", "chance")) * stat;
+        int amount = stat / 15 + 1;
 
-        // 적용 가능한 블록이 아니거나, 첫 드랍 아이템이 부순 블록과 같다면(섬손) 종료
-        if (!luck.isAppliedMaterial(brokenBlock) || firstItem == brokenBlock) {
+        // 최종 확률
+        Double playerChance = getConfig().getDouble(KeyNameGenerator.getKey("luck", "chance")) * stat;
+        int randomChance = ThreadLocalRandom.current().nextInt(100);
+
+        // 적용 가능한 블록이 아니거나,
+        // 첫 드랍 아이템이 부순 블록이거나(섬손)
+        // 확률 미달 시 종료
+        if (!luck.isAppliedMaterial(brokenBlock) || firstItem == brokenBlock || randomChance > playerChance) {
             return;
         }
 
-        int chanceResult = ThreadLocalRandom.current().nextInt(80);
-        if (chanceResult > chance) {
-            return;
-        }
-
-        int lastAmount = (int) (chanceResult / (chance / amount));
+        int lastAmount = ThreadLocalRandom.current().nextInt(amount) + 1;
         player.sendMessage(String.valueOf(ChatColor.GREEN) + ChatColor.BOLD + lastAmount + ChatColor.WHITE
                 + "개 추가 획득 !");
 

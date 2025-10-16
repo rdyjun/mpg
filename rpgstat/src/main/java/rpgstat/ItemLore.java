@@ -5,6 +5,7 @@ import attack.Attack;
 import files.PlayerFile;
 import java.util.ArrayList;
 import java.util.List;
+import luck.Luck;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -123,15 +124,19 @@ public class ItemLore {
     //각 레벨 별 설명
     public String getNowLevelLore(Player p, String itemName) {
         if (itemName.equals(Agility.TYPE)) {
-            return rpgStat.agility.getNowLevelLore(p, itemName);
+            return rpgStat.agility.getNowLevelLore(p);
         }
 
         if (itemName.equals(Attack.TYPE)) {
-            return rpgStat.attack.getNowLevelLore(p, itemName);
+            return rpgStat.attack.getNowLevelLore(p);
         }
 
         if (itemName.equals(Vitality.TYPE)) {
-            return rpgStat.vitality.getNowLevelLore(p, itemName);
+            return rpgStat.vitality.getNowLevelLore(p);
+        }
+
+        if (itemName.equals(Luck.TYPE)) {
+            return rpgStat.luck.getNowLevelLore(p);
         }
 
         return "";
@@ -139,15 +144,19 @@ public class ItemLore {
 
     public String getNextLevelLore(Player p, String itemName, List<String> lore) {
         if (itemName.equals(Agility.TYPE)) {
-            return rpgStat.agility.getNextLevelLore(p, itemName);
+            return rpgStat.agility.getNextLevelLore(p);
         }
 
         if (itemName.equals(Attack.TYPE)) {
-            return rpgStat.attack.getNextLevelLore(p, itemName);
+            return rpgStat.attack.getNextLevelLore(p);
         }
 
         if (itemName.equals(Vitality.TYPE)) {
-            return rpgStat.vitality.getNextLevelLore(p, itemName);
+            return rpgStat.vitality.getNextLevelLore(p);
+        }
+
+        if (itemName.equals(Luck.TYPE)) {
+            return rpgStat.luck.getNextLevelLore(p);
         }
 
         return "";
