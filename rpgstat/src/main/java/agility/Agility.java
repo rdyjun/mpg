@@ -38,14 +38,20 @@ public class Agility extends Stat {
         Integer statLevel = (Integer) PlayerFile.getPlayerFile(player, STAT_NAME);
         Double statOption = rpgStat.getConfig().getDouble(
                 KeyNameGenerator.getKey(STAT_NAME, SPEED_STAT_NAME));
-        return ChatColor.WHITE + "최종 속도 " + ChatColor.GREEN + (statLevel * statOption) + ChatColor.WHITE + " 증가";
+
+        double lastSpeed = Math.floor(statLevel * statOption * 1000.0) / 1000.0;
+
+        return ChatColor.WHITE + "최종 속도 " + ChatColor.GREEN + lastSpeed + ChatColor.WHITE + " 증가";
     }
 
     public String getNextLevelLore(Player player) {
         Integer statLevel = ((Integer) PlayerFile.getPlayerFile(player, STAT_NAME) + 1);
         Double statOption = rpgStat.getConfig().getDouble(
                 KeyNameGenerator.getKey(STAT_NAME, SPEED_STAT_NAME));
-        return ChatColor.GRAY + "최종 속도가 " + ChatColor.DARK_GREEN + (statLevel * statOption) + ChatColor.WHITE
+
+        double lastSpeed = Math.floor(statLevel * statOption * 1000.0) / 1000.0;
+
+        return ChatColor.GRAY + "최종 속도가 " + ChatColor.DARK_GREEN + lastSpeed + ChatColor.WHITE
                 + " 만큼 증가합니다.";
     }
 }

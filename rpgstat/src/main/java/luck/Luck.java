@@ -31,7 +31,8 @@ public class Luck {
 
         double lastChance = Math.floor(statLevel * statOption * 1000.0) / 1000.0;
 
-        return ChatColor.WHITE + "최종 행운 " + ChatColor.GREEN + lastChance + ChatColor.WHITE + " 증가";
+        return ChatColor.WHITE + "최종 행운 " + ChatColor.GREEN + ChatColor.BOLD + lastChance + "%" + ChatColor.WHITE
+                + " 증가";
     }
 
     public String getNextLevelLore(Player player) {
@@ -41,6 +42,7 @@ public class Luck {
 
         double lastChance = Math.floor(statLevel * statOption * 1000.0) / 1000.0;
 
-        return ChatColor.GRAY + "최종 행운이 " + ChatColor.DARK_GREEN + lastChance + ChatColor.WHITE + " 만큼 증가합니다.";
+        return ChatColor.GRAY + "최종 행운이 " + ChatColor.DARK_GREEN + ChatColor.BOLD + lastChance + "%" + ChatColor.WHITE
+                + " 만큼 증가합니다.";
     }
 }
