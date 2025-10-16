@@ -100,10 +100,12 @@ public class RpgStat extends JavaPlugin implements Listener {
         //플레이어 파일 생성
         PlayerFile.createFile(player);
 
-        Bukkit.getScheduler().runTaskLater(this, () -> {
-            agility.init(player);
-            vitality.init(player);
-        }, 1L);
+        Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
+            Bukkit.getScheduler().runTask(this, () -> {
+                agility.init(player);
+                vitality.init(player);
+            });
+        });
     }
 
     //스텟창 설정 ----------------------------
