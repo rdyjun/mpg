@@ -129,8 +129,11 @@ public class RpgStat extends JavaPlugin implements Listener {
         }
 
         int lastAmount = ThreadLocalRandom.current().nextInt(amount) + 1;
-        player.sendMessage(String.valueOf(ChatColor.GREEN) + ChatColor.BOLD + lastAmount + ChatColor.WHITE
-                + "개 추가 획득 !");
+        player.sendMessage(
+                String.valueOf(ChatColor.GREEN) + ChatColor.BOLD + firstItem.name() + " " + lastAmount
+                        + ChatColor.YELLOW
+                        + ChatColor.BOLD
+                        + "개 추가 획득 !");
 
         e.getBlock().getDrops().forEach(item -> {
             Location dropLocation = e.getBlock().getLocation();
