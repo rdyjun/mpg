@@ -45,20 +45,20 @@ public class ItemLore {
                 // 현재 레벨
                 lore.add(ChatColor.GOLD + "현재 레벨 : " + nowStatLevel);
                 // 현재 레벨 설명
-                getNowLevelLore(p, itemName, lore);
+                lore.add(getNowLevelLore(p, itemName));
+                lore.add("\n");
                 // 다음 레벨
                 lore.add(ChatColor.DARK_PURPLE + "다음 레벨 : " + (nowStatLevel + 1));
             } else {
                 // 현재 레벨
                 lore.add(ChatColor.GOLD + "현재 레벨 : MAX");
                 // 현재 레벨 설명
-                getNowLevelLore(p, itemName, lore);
+                lore.add(getNowLevelLore(p, itemName));
+                lore.add("\n");
                 // 다음 레벨
                 lore.add(ChatColor.DARK_PURPLE + "다음 레벨 : MAX");
             }
 
-            System.out.println(nowStatLevel + " :: " + (maxStatLevel - 1));
-            System.out.println(getNextLevelLore(p, itemName, lore));
             //다음 레벨 설명
             if (nowStatLevel < maxStatLevel - 1) {
                 lore.add(getNextLevelLore(p, itemName, lore));
@@ -121,42 +121,20 @@ public class ItemLore {
     }
 
     //각 레벨 별 설명
-    public void getNowLevelLore(Player p, String itemName, List<String> lore) {
-        //stat == 100%기준 배율 증가 - 공격력, 치명타 데미지, 이동속도, 공격속도
-        //statper == 0%기준 배율 증가 - 회피율, 경험치 흭득량
-        //statpls == 0기준 더하기 증가 - 체력, 기력
-        //specific == 5배수 레벨 및 0% 기준 증가 - 치명타 확률
-        //specificpls == 5배수 레벨 기준 더하기 증가
-        String a = "stats" + "." + itemName + ".";
-        if (rpgStat.getConfig().contains(a + "stat")) {  //공격력, 치명타 데미지, 이동속도, 공격속도
-            for (String s : rpgStat.getConfig().getConfigurationSection(a + "stat").getKeys(false)) {
-                lore.add(ChatColor.WHITE + "  " + s + " : +" +
-                        (1 + (Integer) PlayerFile.getPlayerFile(p, itemName) * Double.valueOf(
-                                String.valueOf(rpgStat.getConfig().get(a + "stat" + "." + s))).doubleValue()) * 100
-                        + "%");
-            }
+    public String getNowLevelLore(Player p, String itemName) {
+        if (itemName.equals(Agility.TYPE)) {
+            return rpgStat.agility.getNowLevelLore(p, itemName);
         }
-        if (rpgStat.getConfig().contains(a + "specific")) {  //치명타확률
-            for (String s : rpgStat.getConfig().getConfigurationSection(a + ".specific").getKeys(false)) {
-                lore.add(ChatColor.WHITE + "  " + s + " : +"
-                        + (Integer) PlayerFile.getPlayerFile(p, itemName) / 5 * Double.valueOf(
-                        String.valueOf(rpgStat.getConfig().get(a + "specific" + "." + s))).doubleValue() + "%");
-            }
+
+        if (itemName.equals(Attack.TYPE)) {
+            return rpgStat.attack.getNowLevelLore(p, itemName);
         }
-        if (rpgStat.getConfig().contains(a + "statper")) {  //회피율, 경험치 흭득량
-            for (String s : rpgStat.getConfig().getConfigurationSection(a + ".statper").getKeys(false)) {
-                lore.add(ChatColor.WHITE + "  " + s + " : +" + ((Integer) PlayerFile.getPlayerFile(p, itemName)
-                        * Double.valueOf(String.valueOf(rpgStat.getConfig().get(a + "statper" + "." + s)))
-                        .doubleValue()) + "%");
-            }
+
+        if (itemName.equals(Vitality.TYPE)) {
+            return rpgStat.vitality.getNowLevelLore(p, itemName);
         }
-        if (rpgStat.getConfig().contains(a + "statpls")) {  //체력, 기력
-            for (String s : rpgStat.getConfig().getConfigurationSection(a + ".statpls").getKeys(false)) {
-                lore.add(ChatColor.WHITE + "  " + s + " : +" + ((Integer) PlayerFile.getPlayerFile(p, itemName)
-                        * Double.valueOf(String.valueOf(rpgStat.getConfig().get(a + "statpls" + "." + s)))
-                        .doubleValue()));
-            }
-        }
+
+        return "";
     }
 
     public String getNextLevelLore(Player p, String itemName, List<String> lore) {

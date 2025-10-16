@@ -24,10 +24,17 @@ public class Attack {
         return rpgStat.getConfig().getDouble(damageKeyName);
     }
 
+    public String getNowLevelLore(Player player, String statName) {
+        Integer statLevel = (Integer) PlayerFile.getPlayerFile(player, statName);
+        Double statOption = rpgStat.getConfig().getDouble(
+                KeyNameGenerator.getKey(statName, DAMAGE_STAT_NAME));
+        return ChatColor.WHITE + "최종 데미지 " + ChatColor.GREEN + (statLevel * statOption) + ChatColor.WHITE + " 증가";
+    }
+
     public String getNextLevelLore(Player player, String statName) {
         Integer statLevel = ((Integer) PlayerFile.getPlayerFile(player, statName) + 1);
         Double statOption = rpgStat.getConfig().getDouble(
                 KeyNameGenerator.getKey(statName, DAMAGE_STAT_NAME));
-        return ChatColor.WHITE + "최종 데미지가 " + ChatColor.GREEN + (statLevel * statOption) + ChatColor.WHITE + " 만큼 증가합니다.";
+        return ChatColor.GRAY + "최종 데미지가 " + ChatColor.DARK_GREEN + (statLevel * statOption) + ChatColor.WHITE + " 만큼 증가합니다.";
     }
 }
