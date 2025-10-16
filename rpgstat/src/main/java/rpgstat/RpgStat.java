@@ -327,12 +327,15 @@ public class RpgStat extends JavaPlugin implements Listener {
 
         Player p = (Player) e.getDamager();
         double additionalDamage = this.attack.getAdditionalDamage(p);
-        double damage = Math.floor((e.getDamage() + additionalDamage) * 10.0) / 10.0;
+
+        double baseDamage = e.getDamage();
+        double damage = Math.floor(baseDamage * additionalDamage * 100.0) / 100.0;
 
         boolean isCritical = isCritical(p);
         if (isCritical) {
-            e.setDamage(damage * 1.5);
-            p.sendMessage(messageHead() + ChatColor.YELLOW + ChatColor.BOLD + "크리티컬 ! +" + e.getDamage());
+            double lastDamage = Math.floor((damage * 1.5) * 10.0) / 10.0;
+            e.setDamage(lastDamage);
+            p.sendMessage(messageHead() + ChatColor.YELLOW + ChatColor.BOLD + "크리티컬 ! +" + lastDamage);
 
             return;
         }

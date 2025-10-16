@@ -79,7 +79,7 @@ stats:
       statup:
         - "클릭 시 해당 스텟을 올립니다"
     amount:
-      damage: 0.25
+      damage: 0.02
       critical-damage: 0.1
     position: 2
     max-level: 100
