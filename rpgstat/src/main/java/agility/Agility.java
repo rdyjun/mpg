@@ -45,6 +45,7 @@ public class Agility extends Stat {
         Integer statLevel = ((Integer) PlayerFile.getPlayerFile(player, statName) + 1);
         Double statOption = rpgStat.getConfig().getDouble(
                 KeyNameGenerator.getKey(statName, SPEED_STAT_NAME));
-        return ChatColor.GRAY + "최종 속도가 " + ChatColor.DARK_GREEN + (statLevel * statOption) + ChatColor.WHITE + " 만큼 증가합니다.";
+        return ChatColor.GRAY + "최종 속도가 " + ChatColor.DARK_GREEN + (statLevel * statOption) + ChatColor.WHITE
+                + " 만큼 증가합니다.";
     }
 }

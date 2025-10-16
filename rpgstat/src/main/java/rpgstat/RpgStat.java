@@ -1,14 +1,11 @@
 package rpgstat;
 
-import abundance.Abundance;
 import agility.Agility;
-import attack.Attack;
 import attack.Attack;
 import files.PlayerData;
 import files.PlayerFile;
 import java.io.File;
 import java.io.IOException;
-import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import luck.Luck;
@@ -23,6 +20,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -37,12 +35,12 @@ import vitality.Vitality;
 
 
 public class RpgStat extends JavaPlugin implements Listener {
-    private PlayerData playerData;
-    private ItemLore itemLore;
     protected Agility agility;
     protected Vitality vitality;
     protected Attack attack;
     protected Luck luck;
+    private PlayerData playerData;
+    private ItemLore itemLore;
 
     //플러그인 활성화
     @Override
@@ -109,21 +107,18 @@ public class RpgStat extends JavaPlugin implements Listener {
         int amount = stat / 15;
         Double chance = getConfig().getDouble(KeyNameGenerator.getKey("luck", "chance")) * stat;
 
-        System.out.println("캠");
         if (!luck.isAppliedBlock(e.getBlock())) {
-            System.out.println("이 블록 아님");
             return;
         }
-        System.out.println(e.getBlock().getType().toString());
 
         int chanceResult = ThreadLocalRandom.current().nextInt(80);
-        System.out.println(chanceResult + " :: " + stat + " :: " + chance + " :: " + amount);
         if (chanceResult > chance) {
             return;
         }
 
         int lastAmount = (int) (chanceResult / (chance / amount));
-        player.sendMessage("" + ChatColor.GREEN.toString() + ChatColor.BOLD.toString() + lastAmount + ChatColor.WHITE + "개 추가 획득 !");
+        player.sendMessage(String.valueOf(ChatColor.GREEN) + ChatColor.BOLD + lastAmount + ChatColor.WHITE
+                + "개 추가 획득 !");
 
         e.getBlock().getDrops().forEach(item -> {
             Location dropLocation = e.getBlock().getLocation();
@@ -134,8 +129,8 @@ public class RpgStat extends JavaPlugin implements Listener {
         });
     }
 
-    //처음 접속했을 때
-    @EventHandler
+    // 플레이어가 접속했을 때 플레이어 파일 생성 및 스탯 초기화 (이미 있다면 제외)
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void newPlayer(PlayerJoinEvent event) {
         Player player = event.getPlayer();
 
@@ -143,10 +138,10 @@ public class RpgStat extends JavaPlugin implements Listener {
         PlayerFile.createFile(player);
 
         Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
-            Bukkit.getScheduler().runTask(this, () -> {
+            Bukkit.getScheduler().runTaskLater(this, () -> {
                 agility.init(player);
                 vitality.init(player);
-            });
+            }, 5L);
         });
     }
 
