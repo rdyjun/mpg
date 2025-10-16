@@ -52,12 +52,12 @@ public class PlayerData {
 
         ChatColor statColor = getStatColor(statName);
         String statDisplayName = getDisplayName(statName);
-        int stat = (Integer) PlayerFile.getPlayerFile(player, statName);
 
         String message =
                 ChatColor.BOLD + "" + ChatColor.DARK_GREEN + "[" + ChatColor.GREEN + "STAT" + ChatColor.DARK_GREEN
-                        + "] " + statColor + statDisplayName + ChatColor.RESET + " " + ChatColor.WHITE + stat + " -> "
-                        + (stat + 1) + " 스텟 상승!";
+                        + "] " + statColor + statDisplayName + ChatColor.RESET + " " + ChatColor.WHITE + statLevel
+                        + " -> "
+                        + (statLevel + 1) + " 스텟 상승!";
 
         player.sendMessage(message);
 
