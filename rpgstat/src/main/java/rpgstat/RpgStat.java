@@ -6,6 +6,7 @@ import files.PlayerData;
 import files.PlayerFile;
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import luck.Luck;
@@ -18,11 +19,12 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockDropItemEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerExpChangeEvent;
@@ -101,13 +103,23 @@ public class RpgStat extends JavaPlugin implements Listener {
     }
 
     @EventHandler
-    public void onLuck(BlockBreakEvent e) {
+    public void onLuck(BlockDropItemEvent e) {
         Player player = e.getPlayer();
+
+        Material brokenBlock = e.getBlockState()
+                .getType();
+
+        List<Item> droppedItems = e.getItems();
+        Material firstItem = droppedItems.get(0)
+                .getItemStack()
+                .getType();
+
         Integer stat = (Integer) PlayerFile.getPlayerFile(player, "luck");
         int amount = stat / 15;
         Double chance = getConfig().getDouble(KeyNameGenerator.getKey("luck", "chance")) * stat;
 
-        if (!luck.isAppliedBlock(e.getBlock())) {
+        // 적용 가능한 블록이 아니거나, 첫 드랍 아이템이 부순 블록과 같다면(섬손) 종료
+        if (!luck.isAppliedMaterial(brokenBlock) || firstItem == brokenBlock) {
             return;
         }
 
