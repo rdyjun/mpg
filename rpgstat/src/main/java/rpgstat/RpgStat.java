@@ -15,6 +15,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -24,6 +26,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockDamageEvent;
 import org.bukkit.event.block.BlockDropItemEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -102,16 +106,19 @@ public class RpgStat extends JavaPlugin implements Listener {
         }
     }
 
-    @EventHandler
-    public void onLuck(BlockDropItemEvent e) {
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onLuck(BlockBreakEvent e) {
         Player player = e.getPlayer();
 
-        Material brokenBlock = e.getBlockState()
-                .getType();
+        Block brokenBlock = e.getBlock();
 
-        List<Item> droppedItems = e.getItems();
-        Material firstItem = droppedItems.get(0)
-                .getItemStack()
+        List<ItemStack> droppedItems = brokenBlock.getDrops()
+                .stream()
+                .filter((itemStack) -> !itemStack.getType().equals(Material.AIR))
+                .toList();
+
+        Material firstItem = droppedItems
+                .get(0)
                 .getType();
 
         Integer stat = (Integer) PlayerFile.getPlayerFile(player, "luck");
@@ -124,7 +131,7 @@ public class RpgStat extends JavaPlugin implements Listener {
         // 적용 가능한 블록이 아니거나,
         // 첫 드랍 아이템이 부순 블록이거나(섬손)
         // 확률 미달 시 종료
-        if (!luck.isAppliedMaterial(brokenBlock) || firstItem == brokenBlock || randomChance > playerChance) {
+        if (!luck.isAppliedMaterial(brokenBlock.getType()) || firstItem.equals(brokenBlock.getType()) || randomChance > playerChance) {
             return;
         }
 
