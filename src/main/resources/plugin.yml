@@ -1,4 +1,8 @@
-name: mpg
+name: RPGSTAT
 version: '1.0-SNAPSHOT'
 main: org.rdyjun.rpgstat.RpgStat
 api-version: '1.21'
+
+commands:
+  stat:
+    usage: /<command>

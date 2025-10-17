@@ -4,6 +4,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.entity.Player;
+import org.rdyjun.componentgenerator.ComponentGenerator;
 import org.rdyjun.files.PlayerFile;
 import org.rdyjun.namegenerator.KeyNameGenerator;
 import org.rdyjun.rpgstat.RpgStat;
@@ -44,9 +45,10 @@ public class Vitality extends Stat {
         double lastHealth = Math.floor(statLevel * statOption * 10.0) / 10.0;
 
         return Component.empty()
-                .append(Component.text("최종 체력 ", NamedTextColor.WHITE))
-                .append(Component.text(String.valueOf(lastHealth), NamedTextColor.GREEN).decorate(TextDecoration.BOLD))
-                .append(Component.text(" 증가", NamedTextColor.WHITE));
+                .append(ComponentGenerator.text("최종 체력 ", NamedTextColor.WHITE))
+                .append(ComponentGenerator.text(String.valueOf(lastHealth), NamedTextColor.GREEN)
+                        .decorate(TextDecoration.BOLD))
+                .append(ComponentGenerator.text(" 증가", NamedTextColor.WHITE));
     }
 
     public Component getNextLevelLore(Player player) {
@@ -55,10 +57,10 @@ public class Vitality extends Stat {
                 KeyNameGenerator.getKey(STAT_NAME, HEALTH_STAT_NAME));
 
         return Component.empty()
-                .append(Component.text("최종 체력이 ", NamedTextColor.GRAY))
-                .append(Component.text(String.valueOf(Math.floor(statLevel * statOption * 10.0) / 10.0),
+                .append(ComponentGenerator.text("최종 체력이 ", NamedTextColor.GRAY))
+                .append(ComponentGenerator.text(String.valueOf(Math.floor(statLevel * statOption * 10.0) / 10.0),
                         NamedTextColor.DARK_GREEN).decorate(TextDecoration.BOLD))
-                .append(Component.text(" 만큼 증가합니다.", NamedTextColor.WHITE));
+                .append(ComponentGenerator.text(" 만큼 증가합니다.", NamedTextColor.WHITE));
     }
 
     public Component getDisplayName() {

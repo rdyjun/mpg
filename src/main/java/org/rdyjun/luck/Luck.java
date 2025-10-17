@@ -5,6 +5,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.rdyjun.componentgenerator.ComponentGenerator;
 import org.rdyjun.files.PlayerFile;
 import org.rdyjun.namegenerator.KeyNameGenerator;
 import org.rdyjun.rpgstat.RpgStat;
@@ -33,9 +34,9 @@ public class Luck {
 
         double lastChance = Math.floor(statLevel * statOption * 1000.0) / 1000.0;
 
-        return Component.text("최종 행운 ", NamedTextColor.WHITE)
-                .append(Component.text(lastChance + "%", NamedTextColor.GREEN).decorate(TextDecoration.BOLD))
-                .append(Component.text(" 증가", NamedTextColor.WHITE));
+        return ComponentGenerator.text("최종 행운 ", NamedTextColor.WHITE)
+                .append(ComponentGenerator.text(lastChance + "%", NamedTextColor.GREEN).decorate(TextDecoration.BOLD))
+                .append(ComponentGenerator.text(" 증가", NamedTextColor.WHITE));
     }
 
     public Component getNextLevelLore(Player player) {
@@ -45,9 +46,10 @@ public class Luck {
 
         double lastChance = Math.floor(statLevel * statOption * 1000.0) / 1000.0;
 
-        return Component.text("최종 행운이 ", NamedTextColor.GRAY)
-                .append(Component.text(lastChance + "%", NamedTextColor.DARK_GREEN).decorate(TextDecoration.BOLD))
-                .append(Component.text(" 만큼 증가합니다.", NamedTextColor.WHITE));
+        return ComponentGenerator.text("최종 행운이 ", NamedTextColor.GRAY)
+                .append(ComponentGenerator.text(lastChance + "%", NamedTextColor.DARK_GREEN)
+                        .decorate(TextDecoration.BOLD))
+                .append(ComponentGenerator.text(" 만큼 증가합니다.", NamedTextColor.WHITE));
     }
 
     public Component getDisplayName() {

@@ -13,6 +13,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.rdyjun.agility.Agility;
 import org.rdyjun.attack.Attack;
+import org.rdyjun.componentgenerator.ComponentGenerator;
 import org.rdyjun.files.PlayerFile;
 import org.rdyjun.luck.Luck;
 import org.rdyjun.vitality.Vitality;
@@ -34,12 +35,14 @@ public class ItemLore {
                 String.valueOf(rpgStat.getConfig().get(head + "." + itemName + "." + "material")));
         String chatColor = String.valueOf(rpgStat.getConfig().get(head + "." + itemName + "." + "color"));
         String statName = String.valueOf(rpgStat.getConfig().get(head + "." + itemName + "." + "name"));
+
         //LORE 영역
         List<Component> lore = new ArrayList<>();
         //기본 아이템 설명
         for (String s : rpgStat.getConfig().getStringList(head + "." + itemName + "." + "lore" + "." + "itemlore")) {
             Component converted = LegacyComponentSerializer.legacyAmpersand()
-                    .deserialize("&l" + chatColor + s);
+                    .deserialize("&l" + chatColor + s)
+                    .decoration(TextDecoration.ITALIC, false);
             lore.add(converted);
         }
         if (head.equals("stats")) {  //스텟일때
@@ -49,54 +52,53 @@ public class ItemLore {
 
             if (nowStatLevel < maxStatLevel - 1) {
                 // 현재 레벨
-                lore.add(Component.text("현재 레벨 : " + nowStatLevel, NamedTextColor.GOLD));
+                lore.add(ComponentGenerator.text("현재 레벨 : " + nowStatLevel, NamedTextColor.GOLD));
                 // 현재 레벨 설명
                 lore.add(getNowLevelLore(p, itemName));
-                lore.add(Component.text("\n"));
+                lore.add(Component.space());
                 // 다음 레벨
-                lore.add(Component.text("다음 레벨 : " + (nowStatLevel + 1), NamedTextColor.DARK_PURPLE));
+                lore.add(ComponentGenerator.text("다음 레벨 : " + (nowStatLevel + 1), NamedTextColor.DARK_PURPLE));
             } else {
                 // 현재 레벨
-                lore.add(Component.text("현재 레벨 : MAX", NamedTextColor.GOLD));
+                lore.add(ComponentGenerator.text("현재 레벨 : MAX", NamedTextColor.GOLD));
                 // 현재 레벨 설명
-                lore.add(getNowLevelLore(p, itemName));
-                lore.add(Component.text("\n"));
+                lore.add(getNowLevelLore(p, itemName).decoration(TextDecoration.ITALIC, false));
+                lore.add(Component.space().decoration(TextDecoration.ITALIC, false));
                 // 다음 레벨
-                lore.add(Component.text("다음 레벨 : MAX", NamedTextColor.DARK_PURPLE));
+                lore.add(ComponentGenerator.text("다음 레벨 : MAX", NamedTextColor.DARK_PURPLE)
+                        .decoration(TextDecoration.ITALIC, false));
             }
 
             //다음 레벨 설명
             if (nowStatLevel < maxStatLevel - 1) {
                 lore.add(getNextLevelLore(p, itemName));
             } else {
-                lore.add(Component.text("  마지막 레벨입니다.", NamedTextColor.GRAY));
+                lore.add(ComponentGenerator.text("  마지막 레벨입니다.", NamedTextColor.GRAY));
             }
 
             //공백
-            lore.add(Component.text(" "));
+            lore.add(Component.space());
 
             //버튼 힌트
             for (String s : rpgStat.getConfig().getStringList(head + "." + itemName + "." + "lore" + "." + "statup")) {
                 if (nowStatLevel < maxStatLevel) {
-                    lore.add(Component.text(s, NamedTextColor.DARK_GRAY));
+                    lore.add(ComponentGenerator.text(s, NamedTextColor.DARK_GRAY));
                     continue;
                 }
 
-                lore.add(Component.text("이 스텟은 더 이상 레벨을 올릴 수 없습니다.", NamedTextColor.DARK_GRAY));
+                lore.add(ComponentGenerator.text("이 스텟은 더 이상 레벨을 올릴 수 없습니다.", NamedTextColor.DARK_GRAY));
             }
         }
         //아이템 선언
         ItemStack stat;
+
+        int statPoint = (Integer) PlayerFile.getPlayerFile(p, STAT_POINT_NAME);
+
         //아이템 수량 지정
         if (itemName.equalsIgnoreCase(STAT_POINT_NAME)) {
-            int n;
-            if ((Integer) PlayerFile.getPlayerFile(p, STAT_POINT_NAME) <= 0) {
-                n = 1;
-            } else {
-                n = (Integer) PlayerFile.getPlayerFile(p, STAT_POINT_NAME);
-            }
-            stat = new ItemStack(material, n);
-        } else if (material == Material.getMaterial("STAINED_GLASS_PANE")) {
+
+            stat = new ItemStack(material, Math.max(statPoint, 1));
+        } else if (material == Material.BLACK_STAINED_GLASS_PANE) {
             stat = new ItemStack(material, 1, (short) 7);
         } else {
             stat = new ItemStack(material);
@@ -105,9 +107,9 @@ public class ItemLore {
         ItemMeta statMeta = stat.getItemMeta();
         //아이템 이름
         if (itemName.equalsIgnoreCase(STAT_POINT_NAME)) {
-            statMeta.displayName(getDisplayName(statName));
+            statMeta.displayName(getDisplayName(statName, statPoint));
         } else {
-            statMeta.displayName(Component.text(statName, NamedTextColor.WHITE).decorate(TextDecoration.BOLD));
+            statMeta.displayName(ComponentGenerator.text(statName, NamedTextColor.WHITE).decorate(TextDecoration.BOLD));
         }
         statMeta.lore(lore);
         statMeta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
@@ -116,7 +118,16 @@ public class ItemLore {
         return stat;
     }
 
-    private Component getDisplayName(String statName) {
+    private Component getDisplayName(String statName, int statPoint) {
+        if (statName.equals("statpoint")) {
+            return ComponentGenerator.text("보유 스탯 : ", NamedTextColor.WHITE)
+                    .decorate(TextDecoration.BOLD)
+                    .decoration(TextDecoration.ITALIC, false)
+                    .append(ComponentGenerator.text(String.valueOf(statPoint), NamedTextColor.GOLD)
+                            .decorate(TextDecoration.BOLD)
+                            .decoration(TextDecoration.ITALIC, false));
+        }
+
         if (statName.equals("luck")) {
             return rpgStat.luck.getDisplayName();
         }
@@ -133,7 +144,7 @@ public class ItemLore {
             return rpgStat.agility.getDisplayName();
         }
 
-        return Component.text("알 수 없음");
+        return ComponentGenerator.text("알 수 없음", NamedTextColor.WHITE);
     }
 
     private String getHead(String itemName) {

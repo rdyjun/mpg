@@ -3,6 +3,7 @@ package org.rdyjun.agility;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.Player;
+import org.rdyjun.componentgenerator.ComponentGenerator;
 import org.rdyjun.files.PlayerFile;
 import org.rdyjun.namegenerator.KeyNameGenerator;
 import org.rdyjun.rpgstat.RpgStat;
@@ -43,9 +44,9 @@ public class Agility extends Stat {
 
         double lastSpeed = Math.floor(statLevel * statOption * 1000.0) / 1000.0;
 
-        return Component.text("최종 속도 ", NamedTextColor.WHITE)
-                .append(Component.text(String.valueOf(lastSpeed), NamedTextColor.GREEN))
-                .append(Component.text(" 증가", NamedTextColor.WHITE));
+        return ComponentGenerator.text("최종 속도 ", NamedTextColor.WHITE)
+                .append(ComponentGenerator.text(String.valueOf(lastSpeed), NamedTextColor.GREEN))
+                .append(ComponentGenerator.text(" 증가", NamedTextColor.WHITE));
     }
 
     public Component getNextLevelLore(Player player) {
@@ -55,9 +56,9 @@ public class Agility extends Stat {
 
         double lastSpeed = Math.floor(statLevel * statOption * 1000.0) / 1000.0;
 
-        return Component.text("최종 속도가 ", NamedTextColor.GRAY)
-                .append(Component.text(String.valueOf(lastSpeed), NamedTextColor.DARK_GREEN))
-                .append(Component.text(" 만큼 증가합니다.", NamedTextColor.WHITE));
+        return ComponentGenerator.text("최종 속도가 ", NamedTextColor.GRAY)
+                .append(ComponentGenerator.text(String.valueOf(lastSpeed), NamedTextColor.DARK_GREEN))
+                .append(ComponentGenerator.text(" 만큼 증가합니다.", NamedTextColor.WHITE));
     }
 
     public Component getDisplayName() {

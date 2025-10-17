@@ -4,6 +4,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.entity.Player;
+import org.rdyjun.componentgenerator.ComponentGenerator;
 import org.rdyjun.files.PlayerFile;
 import org.rdyjun.namegenerator.KeyNameGenerator;
 import org.rdyjun.rpgstat.RpgStat;
@@ -36,10 +37,10 @@ public class Attack {
 
         double lastDamage = calcDamage(statLevel, statOption);
 
-        return Component.text("최종 데미지 ", NamedTextColor.WHITE)
-                .append(Component.text(lastDamage + "%").color(NamedTextColor.GREEN)
+        return ComponentGenerator.text("최종 데미지 ", NamedTextColor.WHITE)
+                .append(ComponentGenerator.text(lastDamage + "%", NamedTextColor.GREEN)
                         .decorate(TextDecoration.BOLD))
-                .append(Component.text(" 증가", NamedTextColor.WHITE));
+                .append(ComponentGenerator.text(" 증가", NamedTextColor.WHITE));
     }
 
     public Component getNextLevelLore(Player player) {
@@ -49,10 +50,10 @@ public class Attack {
 
         double lastDamage = calcDamage(statLevel, statOption);
 
-        return Component.text("최종 데미지가 ", NamedTextColor.GRAY)
-                .append(Component.text(lastDamage + "%").color(NamedTextColor.DARK_GREEN)
+        return ComponentGenerator.text("최종 데미지가 ", NamedTextColor.GRAY)
+                .append(ComponentGenerator.text(lastDamage + "%", NamedTextColor.DARK_GREEN)
                         .decorate(TextDecoration.BOLD))
-                .append(Component.text(" 만큼 증가합니다.", NamedTextColor.WHITE));
+                .append(ComponentGenerator.text(" 만큼 증가합니다.", NamedTextColor.WHITE));
     }
 
     public double calcDamage(int statLevel, double statOption) {
