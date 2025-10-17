@@ -1,6 +1,0 @@
-name: CUSTOMITEM
-version: '1.0.0'
-main: customitem.CustomItem
-
-commands:
-  customitem:

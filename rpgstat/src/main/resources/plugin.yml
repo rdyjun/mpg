@@ -1,7 +1,0 @@
-name: RPGSTAT
-version: '1.0.0'
-main: rpgstat.RpgStat
-authors: [ geenee10 ]
-
-commands:
-  stat:

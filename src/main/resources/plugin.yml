@@ -1,0 +1,4 @@
+name: mpg
+version: '1.0-SNAPSHOT'
+main: org.rdyjun.rpgstat.RpgStat
+api-version: '1.21'
