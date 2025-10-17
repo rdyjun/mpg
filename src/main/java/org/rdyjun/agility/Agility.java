@@ -2,6 +2,7 @@ package org.rdyjun.agility;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.entity.Player;
 import org.rdyjun.componentgenerator.ComponentGenerator;
 import org.rdyjun.files.PlayerFile;
@@ -62,6 +63,7 @@ public class Agility extends Stat {
     }
 
     public Component getDisplayName() {
-        return Component.text("민첩", NamedTextColor.AQUA);
+        return Component.text("민첩", NamedTextColor.AQUA)
+                .decorate(TextDecoration.BOLD);
     }
 }

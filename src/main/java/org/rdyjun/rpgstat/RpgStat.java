@@ -5,8 +5,10 @@ import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -22,6 +24,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.player.PlayerChangedWorldEvent;
+import org.bukkit.event.player.PlayerEvent;
 import org.bukkit.event.player.PlayerExpChangeEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.Inventory;
@@ -30,6 +34,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffectType;
 import org.rdyjun.agility.Agility;
 import org.rdyjun.attack.Attack;
+import org.rdyjun.componentgenerator.ComponentGenerator;
 import org.rdyjun.files.PlayerData;
 import org.rdyjun.files.PlayerFile;
 import org.rdyjun.luck.Luck;
@@ -48,7 +53,7 @@ public class RpgStat extends JavaPlugin implements Listener {
     //플러그인 활성화
     @Override
     public void onEnable() {
-        Bukkit.getConsoleSender().sendMessage(NamedTextColor.GREEN + "스텟 플러그인이 활성화되었습니다");
+        Bukkit.getConsoleSender().sendMessage(ComponentGenerator.text("스텟 플러그인이 활성화되었습니다", NamedTextColor.GREEN));
         Bukkit.getPluginManager().registerEvents(this, this);
 
         if (!getDataFolder().exists()) {
@@ -73,7 +78,7 @@ public class RpgStat extends JavaPlugin implements Listener {
     //플러그인 비활성화
     @Override
     public void onDisable() {
-        Bukkit.getConsoleSender().sendMessage(NamedTextColor.RED + "스텟 플러그인이 비활성화되었습니다");
+        Bukkit.getConsoleSender().sendMessage(ComponentGenerator.text("스텟 플러그인이 비활성화되었습니다", NamedTextColor.RED));
         saveConfig();
     }
 
@@ -94,12 +99,12 @@ public class RpgStat extends JavaPlugin implements Listener {
 
             pFile.set(pID + ".statpoint", pFile.getInt(p.getUniqueId() + "." + "statpoint") + 1);
             pFile.save(pf);
-            p.sendMessage(TextDecoration.BOLD + "" + NamedTextColor.DARK_GREEN + "[" + NamedTextColor.GREEN + "STAT"
-                    + NamedTextColor.DARK_GREEN + "] " + NamedTextColor.WHITE + "레벨업! 현재 "
-                    + p.getLevel() + "레벨 입니다 !");
-            p.sendMessage(TextDecoration.BOLD + "" + NamedTextColor.DARK_GREEN + "[" + NamedTextColor.GREEN + "STAT"
-                    + NamedTextColor.DARK_GREEN + "] " + NamedTextColor.WHITE + "보유 스텟 : "
-                    + pFile.get(pID + ".statpoint"));
+            p.sendMessage(messageHead().append(
+                    ComponentGenerator.text("레벨업! 현재 " + p.getLevel() + "레벨입니다 !", NamedTextColor.WHITE)
+                            .decorate(TextDecoration.BOLD)));
+            p.sendMessage(messageHead().append(
+                    ComponentGenerator.text("보유 스텟 : " + pFile.get(pID + ".statpoint"), NamedTextColor.WHITE)
+                            .decorate(TextDecoration.BOLD)));
         }
     }
 
@@ -128,6 +133,9 @@ public class RpgStat extends JavaPlugin implements Listener {
         double playerChance = getConfig().getDouble(KeyNameGenerator.getKey("luck", "chance")) * stat;
         int randomChance = ThreadLocalRandom.current().nextInt(100);
 
+        System.out.println(!luck.isAppliedMaterial(brokenBlock.getType()) + " :: " + firstItem.equals(
+                brokenBlock.getType()) + " :: " + randomChance + " :: " + playerChance + " :: " + stat);
+
         // 적용 가능한 블록이 아니거나,
         // 첫 드랍 아이템이 부순 블록이거나(섬손)
         // 확률 미달 시 종료
@@ -137,11 +145,9 @@ public class RpgStat extends JavaPlugin implements Listener {
         }
 
         int lastAmount = ThreadLocalRandom.current().nextInt(amount) + 1;
-        player.sendMessage(
-                String.valueOf(NamedTextColor.GREEN) + TextDecoration.BOLD + firstItem.name() + " " + lastAmount
-                        + NamedTextColor.YELLOW
-                        + TextDecoration.BOLD
-                        + "개 추가 획득 !");
+        player.sendMessage(ComponentGenerator.text(firstItem.name() + " " + lastAmount, NamedTextColor.GREEN)
+                .decorate(TextDecoration.BOLD)
+                .append(ComponentGenerator.text("개 추가 획득 !", NamedTextColor.YELLOW).decorate(TextDecoration.BOLD)));
 
         e.getBlock().getDrops().forEach(item -> {
             Location dropLocation = e.getBlock().getLocation();
@@ -154,7 +160,16 @@ public class RpgStat extends JavaPlugin implements Listener {
 
     // 플레이어가 접속했을 때 플레이어 파일 생성 및 스탯 초기화 (이미 있다면 제외)
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void newPlayer(PlayerJoinEvent event) {
+    public void joinPlayer(PlayerJoinEvent event) {
+        statInitialize(event);
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onWorldChange(PlayerChangedWorldEvent event) {
+        statInitialize(event);
+    }
+
+    private void statInitialize(PlayerEvent event) {
         Player player = event.getPlayer();
 
         //플레이어 파일 생성
@@ -198,22 +213,28 @@ public class RpgStat extends JavaPlugin implements Listener {
 
         if (args.length == 1) {
             if (args[0].equalsIgnoreCase("admin")) {
-                p.sendMessage(messageHead() + NamedTextColor.WHITE + "/stat reset [플레이어] " + NamedTextColor.GREEN
-                        + "플레이어의 스텟을 초기화한다. " + NamedTextColor.GRAY + "(레벨 0)");
-                p.sendMessage(messageHead() + NamedTextColor.WHITE + "/stat set [플레이어] [레벨] " + NamedTextColor.GREEN
-                        + "플레이어의 레벨을 임의로 지정합니다. " + NamedTextColor.GRAY + "(스텟은 초기화)");
+                p.sendMessage(messageHead().append(ComponentGenerator.text("/stat reset [플레이어] ", NamedTextColor.WHITE))
+                        .append(ComponentGenerator.text("플레이어의 스텟을 초기화한다. ", NamedTextColor.GREEN))
+                        .append(ComponentGenerator.text("(레벨 0)", NamedTextColor.GRAY)));
+                p.sendMessage(
+                        messageHead().append(ComponentGenerator.text("/stat set [플레이어] [레벨] ", NamedTextColor.WHITE))
+                                .append(ComponentGenerator.text("플레이어의 레벨을 임의로 지정합니다. ", NamedTextColor.GREEN))
+                                .append(ComponentGenerator.text("(스텟은 초기화)", NamedTextColor.GRAY)));
             }
 
             if (args[0].equalsIgnoreCase("reset")) {
-                p.sendMessage(messageHead() + NamedTextColor.RED + "명령어가 올바르지 않습니다 !");
-                p.sendMessage(messageHead() + NamedTextColor.WHITE + "/stat reset [플레이어] " + NamedTextColor.GREEN
-                        + "플레이어의 스텟을 초기화한다. " + NamedTextColor.GRAY + "(레벨 0)");
+                p.sendMessage(messageHead().append(ComponentGenerator.text("명령어가 올바르지 않습니다 !", NamedTextColor.RED)));
+                p.sendMessage(messageHead().append(ComponentGenerator.text("/stat reset [플레이어] ", NamedTextColor.WHITE)
+                        .append(ComponentGenerator.text("플레이어의 스텟을 초기화한다. ", NamedTextColor.GREEN))
+                        .append(ComponentGenerator.text("(레벨 0)", NamedTextColor.GRAY))));
             }
 
             if (args[0].equalsIgnoreCase("set")) {
-                p.sendMessage(messageHead() + NamedTextColor.RED + "명령어가 올바르지 않습니다 !");
-                p.sendMessage(messageHead() + NamedTextColor.WHITE + "/stat set [플레이어] [레벨] " + NamedTextColor.GREEN
-                        + "플레이어의 레벨을 임의로 지정합니다. " + NamedTextColor.GRAY + "(스텟은 초기화)");
+                p.sendMessage(messageHead().append(ComponentGenerator.text("명령어가 올바르지 않습니다 !", NamedTextColor.RED)));
+                p.sendMessage(
+                        messageHead().append(ComponentGenerator.text("/stat set [플레이어] [레벨] ", NamedTextColor.WHITE)
+                                .append(ComponentGenerator.text("플레이어의 레벨을 임의로 지정합니다. ", NamedTextColor.GREEN))
+                                .append(ComponentGenerator.text("(스텟은 초기화)", NamedTextColor.GRAY))));
             }
 
             return true;
@@ -231,8 +252,10 @@ public class RpgStat extends JavaPlugin implements Listener {
                         for (String b : PlayerFile.getPlayerKeys(a)) {
                             PlayerFile.setPlayerFile(a, b, 0);
                         }
-                        p.sendMessage(messageHead() + NamedTextColor.WHITE + "[" + a.getName()
-                                + "] 님의 레벨(스텟)을 초기화시켰습니다 !");
+                        p.sendMessage(messageHead()
+                                .append(
+                                        ComponentGenerator.text("[" + a.getName() + "] 님의 레벨(스텟)을 초기화시켰습니다 !",
+                                                NamedTextColor.WHITE)));
                     } else {
                         playerErrorMessage(p);
                     }
@@ -246,9 +269,11 @@ public class RpgStat extends JavaPlugin implements Listener {
             }
 
             if (args[0].equalsIgnoreCase("set")) {
-                p.sendMessage(messageHead() + NamedTextColor.RED + "명령어가 올바르지 않습니다 !");
-                p.sendMessage(messageHead() + NamedTextColor.WHITE + "/stat set [플레이어] [레벨] " + NamedTextColor.GREEN
-                        + "플레이어의 레벨을 임의로 지정합니다. " + NamedTextColor.GRAY + "(스텟은 초기화)");
+                p.sendMessage(messageHead().append(ComponentGenerator.text("명령어가 올바르지 않습니다 !", NamedTextColor.RED)));
+                p.sendMessage(
+                        messageHead().append(ComponentGenerator.text("/stat set [플레이어] [레벨] ", NamedTextColor.WHITE)
+                                .append(ComponentGenerator.text("플레이어의 레벨을 임의로 지정합니다. ", NamedTextColor.GREEN))
+                                .append(ComponentGenerator.text("(스텟은 초기화)", NamedTextColor.GRAY))));
 
                 return true;
             }
@@ -272,8 +297,8 @@ public class RpgStat extends JavaPlugin implements Listener {
                     }
                     //스텟 포인트 설정
                     PlayerFile.setPlayerFile(a, "statpoint", Integer.parseInt(args[2]));
-                    p.sendMessage(messageHead() + NamedTextColor.WHITE + "[" + a.getName()
-                            + "] 님의 스텟이 정상적으로 세팅되었습니다 !");
+                    p.sendMessage(messageHead().append(ComponentGenerator.text("[" + a.getName()
+                            + "] 님의 스텟이 정상적으로 세팅되었습니다 !", NamedTextColor.WHITE)));
                 } else {
                     playerErrorMessage(p);
                 }
@@ -293,20 +318,27 @@ public class RpgStat extends JavaPlugin implements Listener {
     @EventHandler
     public void ivClick(InventoryClickEvent event) {
         Player player = (Player) event.getWhoClicked();
+
+        Component titleComp = event.getView().title();
+        String inventoryName = PlainTextComponentSerializer.plainText().serialize(titleComp);
+        System.out.println(inventoryName);
+
         //열려있는(스텟) 인벤토리
-        if (!event.getView().title().equals("스텟") || event.getCurrentItem() == null) {
+        if (!inventoryName.equals("스텟")) {
             return;
         }
         //클릭한 아이템에 따른 작동
         event.setCancelled(true);
 
-        String eventName = event.getCurrentItem()
+        Component eventComponent = event.getCurrentItem()
                 .getItemMeta()
-                .displayName()
-                .toString();
+                .displayName();
+
+        String eventName = PlainTextComponentSerializer.plainText().serialize(eventComponent);
 
         for (String statName : getConfig().getConfigurationSection("stats").getKeys(false)) {
             String displayName = getConfig().getString("stats." + statName + ".name");
+
             if (!eventName.contains(displayName)) {
                 continue;
             }
@@ -345,7 +377,9 @@ public class RpgStat extends JavaPlugin implements Listener {
         if (isCritical) {
             double lastDamage = Math.floor((damage * 1.5) * 10.0) / 10.0;
             e.setDamage(lastDamage);
-            p.sendMessage(messageHead() + NamedTextColor.YELLOW + TextDecoration.BOLD + "크리티컬 ! +" + lastDamage);
+            p.sendMessage(messageHead().append(
+                    ComponentGenerator.text("크리티컬 ! +" + lastDamage, NamedTextColor.YELLOW)
+                            .decorate(TextDecoration.BOLD)));
 
             return;
         }
@@ -372,13 +406,16 @@ public class RpgStat extends JavaPlugin implements Listener {
     }
 
     //메시지 헤더--------------------------------------------------------------
-    public String messageHead() {
-        return TextDecoration.BOLD + "" + NamedTextColor.DARK_GREEN + "[" + NamedTextColor.GREEN + "STAT"
-                + NamedTextColor.DARK_GREEN + "] ";
+    public Component messageHead() {
+        return ComponentGenerator.text("[", NamedTextColor.DARK_GREEN).decorate(TextDecoration.BOLD)
+                .append(ComponentGenerator.text("STAT", NamedTextColor.GREEN))
+                .append(ComponentGenerator.text("] ", NamedTextColor.DARK_GREEN).decorate(TextDecoration.BOLD));
     }
 
     //플레이어 입력 오류 메시지--------------------------------------------------------------
     public void playerErrorMessage(Player p) {
-        p.sendMessage(messageHead() + NamedTextColor.RED + "대상이 올바르지 않습니다 !");
+        Component message = messageHead().append(
+                ComponentGenerator.text("대상이 올바르지 않습니다 !", NamedTextColor.RED));
+        p.sendMessage(message);
     }
 }

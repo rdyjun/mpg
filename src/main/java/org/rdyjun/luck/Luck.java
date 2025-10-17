@@ -53,6 +53,7 @@ public class Luck {
     }
 
     public Component getDisplayName() {
-        return Component.text("행운", NamedTextColor.GREEN);
+        return Component.text("행운", NamedTextColor.GREEN)
+                .decorate(TextDecoration.BOLD);
     }
 }

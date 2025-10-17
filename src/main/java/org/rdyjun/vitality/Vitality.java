@@ -64,6 +64,7 @@ public class Vitality extends Stat {
     }
 
     public Component getDisplayName() {
-        return Component.text("생명력", NamedTextColor.RED);
+        return Component.text("생명력", NamedTextColor.RED)
+                .decorate(TextDecoration.BOLD);
     }
 }

@@ -5,7 +5,7 @@ info:
   reset:
     type: "reset"
     material: BLAZE_POWDER
-    name: "&e스텟 초기화"
+    name: "스텟 초기화"
     color: "&e"
     lore:
       itemlore:

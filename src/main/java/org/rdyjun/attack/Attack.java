@@ -61,6 +61,7 @@ public class Attack {
     }
 
     public Component getDisplayName() {
-        return Component.text("공격력", NamedTextColor.DARK_RED);
+        return Component.text("공격력", NamedTextColor.DARK_RED)
+                .decorate(TextDecoration.BOLD);
     }
 }

@@ -106,10 +106,13 @@ public class ItemLore {
 
         ItemMeta statMeta = stat.getItemMeta();
         //아이템 이름
-        if (itemName.equalsIgnoreCase(STAT_POINT_NAME)) {
-            statMeta.displayName(getDisplayName(statName, statPoint));
+        System.out.println(itemName + " :: " + head);
+        System.out.println(head.contains(itemName));
+        if (head.equals("stats") || itemName.equals(STAT_POINT_NAME)) {
+            statMeta.displayName(getDisplayName(itemName, statPoint));
         } else {
-            statMeta.displayName(ComponentGenerator.text(statName, NamedTextColor.WHITE).decorate(TextDecoration.BOLD));
+            statMeta.displayName(
+                    ComponentGenerator.text(statName, NamedTextColor.YELLOW).decorate(TextDecoration.BOLD));
         }
         statMeta.lore(lore);
         statMeta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);

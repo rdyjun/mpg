@@ -5,8 +5,11 @@ import java.io.IOException;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
+import org.codehaus.plexus.util.StringUtils;
+import org.rdyjun.componentgenerator.ComponentGenerator;
 import org.rdyjun.rpgstat.RpgStat;
 
 public class PlayerData {
@@ -30,7 +33,8 @@ public class PlayerData {
 
         // 스텟 포인트가 없을 때 종료
         if (statPoint <= 0) {
-            player.sendMessage(rpgStat.messageHead() + NamedTextColor.RED + "스텟 포인트가 부족합니다 !");
+            player.sendMessage(
+                    rpgStat.messageHead().append(ComponentGenerator.text("스텟 포인트가 부족합니다 !", NamedTextColor.RED)));
             return false;
         }
 
@@ -38,7 +42,8 @@ public class PlayerData {
         String key = String.format("stats.%s.max-level", statName);
         int maxLevel = rpgStat.getConfig().getInt(key);
         if (statLevel >= maxLevel) {
-            player.sendMessage(rpgStat.messageHead() + NamedTextColor.RED + "최대 레벨에 도달했습니다 !");
+            player.sendMessage(
+                    rpgStat.messageHead().append(ComponentGenerator.text("최대 레벨에 도달했습니다 !", NamedTextColor.RED)));
             return false;
         }
 
@@ -55,10 +60,10 @@ public class PlayerData {
         }
         PlayerFile.savePlayerFile(player);
 
-        NamedTextColor statColor = getStatColor(statName);
+        String statColor = getStatColor(statName);
         String statDisplayName = getDisplayName(statName);
 
-        String message = Component.text("[")
+        Component message = Component.text("[")
                 .color(NamedTextColor.DARK_GREEN)
                 .decorate(TextDecoration.BOLD)
                 .append(Component.text("STAT")
@@ -67,26 +72,26 @@ public class PlayerData {
                 .append(Component.text("] ")
                         .color(NamedTextColor.DARK_GREEN)
                         .decorate(TextDecoration.BOLD))
-                .append(Component.text(statDisplayName + " ", statColor))
+                .append(LegacyComponentSerializer.legacyAmpersand()
+                        .deserialize(statColor + statDisplayName + " "))
                 .append(Component.text(String.format("%d -> %d 스탯 상승 !", statLevel, statLevel + 1),
-                        NamedTextColor.WHITE))
-                .content();
+                        NamedTextColor.WHITE));
 
         player.sendMessage(message);
 
         return true;
     }
 
-    public NamedTextColor getStatColor(String statName) {
-        Integer statColorNumber = (Integer) rpgStat.getConfig().get("stats." + statName + "." + "color");
-        if (statColorNumber == null) {
+    public String getStatColor(String statName) {
+        String statColor = (String) rpgStat.getConfig().get("stats." + statName + "." + "color");
+        if (StringUtils.isBlank(statColor)) {
             String warningMessage = String.format(" 스텟 %s의 색상이 올바르지 않습니다. 기본값(흰색)으로 설정됩니다.", statName);
             rpgStat.getLogger()
                     .warning(warningMessage);
-            return NamedTextColor.WHITE;
+            return "&f";
         }
 
-        return NamedTextColor.namedColor(statColorNumber);
+        return statColor;
     }
 
     public String getDisplayName(String statName) {
