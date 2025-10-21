@@ -113,17 +113,18 @@ public class RpgStat extends JavaPlugin implements Listener {
         Player player = e.getPlayer();
 
         Block brokenBlock = e.getBlock();
-        System.out.println("block: " + brokenBlock.getType().name());
 
         List<ItemStack> droppedItems = brokenBlock.getDrops()
                 .stream()
                 .filter((itemStack) -> !itemStack.getType().equals(Material.AIR))
                 .toList();
 
-        droppedItems.forEach((itemStack) -> System.out.println("drop: " + itemStack.getType()));
+        if (droppedItems.isEmpty()) {
+            return;
+        }
 
         Material firstItem = droppedItems
-                .get(0)
+                .getFirst()
                 .getType();
 
         int stat = (Integer) PlayerFile.getPlayerFile(player, "luck");

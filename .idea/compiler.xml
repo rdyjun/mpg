@@ -2,12 +2,21 @@
 <project version="4">
   <component name="CompilerConfiguration">
     <bytecodeTargetLevel>
+<<<<<<< HEAD
       <module name="mpg.CustomItem" target="1.8" />
       <module name="mpg.CustomItem.main" target="1.8" />
       <module name="mpg.CustomItem.test" target="1.8" />
       <module name="mpg.RPGSTAT" target="1.8" />
       <module name="mpg.RPGSTAT.main" target="1.8" />
       <module name="mpg.RPGSTAT.test" target="1.8" />
+=======
+      <module name="mpg.CustomItem" target="21" />
+      <module name="mpg.CustomItem.main" target="21" />
+      <module name="mpg.CustomItem.test" target="21" />
+      <module name="mpg.RPGSTAT" target="21" />
+      <module name="mpg.RPGSTAT.main" target="21" />
+      <module name="mpg.RPGSTAT.test" target="21" />
+>>>>>>> 642a8c97ac0c70eaa8f4d90e72f5850d216706ce
     </bytecodeTargetLevel>
   </component>
 </project>
