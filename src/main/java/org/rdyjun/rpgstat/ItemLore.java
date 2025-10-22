@@ -106,8 +106,6 @@ public class ItemLore {
 
         ItemMeta statMeta = stat.getItemMeta();
         //아이템 이름
-        System.out.println(itemName + " :: " + head);
-        System.out.println(head.contains(itemName));
         if (head.equals("stats") || itemName.equals(STAT_POINT_NAME)) {
             statMeta.displayName(getDisplayName(itemName, statPoint));
         } else {

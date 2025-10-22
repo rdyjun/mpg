@@ -134,9 +134,6 @@ public class RpgStat extends JavaPlugin implements Listener {
         double playerChance = getConfig().getDouble(KeyNameGenerator.getKey("luck", "chance")) * stat;
         int randomChance = ThreadLocalRandom.current().nextInt(100);
 
-        System.out.println(!luck.isAppliedMaterial(brokenBlock.getType()) + " :: " + firstItem.equals(
-                brokenBlock.getType()) + " :: " + randomChance + " :: " + playerChance + " :: " + stat);
-
         // 적용 가능한 블록이 아니거나,
         // 첫 드랍 아이템이 부순 블록이거나(섬손)
         // 확률 미달 시 종료
@@ -322,7 +319,6 @@ public class RpgStat extends JavaPlugin implements Listener {
 
         Component titleComp = event.getView().title();
         String inventoryName = PlainTextComponentSerializer.plainText().serialize(titleComp);
-        System.out.println(inventoryName);
 
         //열려있는(스텟) 인벤토리
         if (!inventoryName.equals("스텟")) {
