@@ -28,6 +28,7 @@ import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerEvent;
 import org.bukkit.event.player.PlayerExpChangeEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -154,6 +155,18 @@ public class RpgStat extends JavaPlugin implements Listener {
                     .getWorld()
                     .dropItemNaturally(dropLocation, dropItem);
         });
+    }
+
+    @EventHandler
+    public void onPlayerRespawn(PlayerRespawnEvent event) {
+        Player player = event.getPlayer();
+
+        // 1틱 딜레이 필수 (부활 처리가 완료된 후)
+        Bukkit.getScheduler().scheduleSyncDelayedTask(
+                this,
+                () -> this.vitality.increase(player),
+                1L
+        );
     }
 
     // 플레이어가 접속했을 때 플레이어 파일 생성 및 스탯 초기화 (이미 있다면 제외)

@@ -3,7 +3,12 @@ package org.rdyjun.vitality;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import org.bukkit.Bukkit;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.player.PlayerRespawnEvent;
 import org.rdyjun.componentgenerator.ComponentGenerator;
 import org.rdyjun.files.PlayerFile;
 import org.rdyjun.namegenerator.KeyNameGenerator;
@@ -29,8 +34,11 @@ public class Vitality extends Stat {
         Integer playerHealthLevel = (Integer) PlayerFile.getPlayerFile(player, STAT_NAME);
 
         double updatedHealth = BASE_HEALTH + (healthStatOption * playerHealthLevel);
+        AttributeInstance attribute = player.getAttribute(Attribute.MAX_HEALTH);
 
-        player.setHealthScale(updatedHealth);
+        if (attribute != null) {
+            attribute.setBaseValue(updatedHealth);
+        }
     }
 
     public void init(Player player) {
