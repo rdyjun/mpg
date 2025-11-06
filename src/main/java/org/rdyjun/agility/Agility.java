@@ -31,7 +31,7 @@ public class Agility extends Stat {
         float updatedSpeed = Math.min(1f, DEFAULT_SPEED + (playerAgilityLevel * agilityStatOption));
 
         player.setWalkSpeed(updatedSpeed);
-        player.setFlySpeed(updatedSpeed);
+//        player.setFlySpeed(updatedSpeed);
     }
 
     public void init(Player player) {
