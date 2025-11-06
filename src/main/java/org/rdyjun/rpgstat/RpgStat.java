@@ -9,6 +9,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -31,6 +32,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffectType;
 import org.rdyjun.agility.Agility;
@@ -44,6 +46,8 @@ import org.rdyjun.vitality.Vitality;
 
 
 public class RpgStat extends JavaPlugin implements Listener {
+    private static Economy econ = null;
+
     protected Agility agility;
     protected Vitality vitality;
     protected Attack attack;
@@ -74,6 +78,29 @@ public class RpgStat extends JavaPlugin implements Listener {
 
         this.itemLore = new ItemLore(this);
         saveDefaultConfig();
+
+        if (!setupEconomy()) {
+            getLogger().severe("❌ Vault economy not found! Disabling plugin...");
+            getServer().getPluginManager().disablePlugin(this);
+        }
+    }
+
+    private boolean setupEconomy() {
+        if (getServer().getPluginManager().getPlugin("Vault") == null) {
+            return false;
+        }
+
+        RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
+        if (rsp == null) {
+            return false;
+        }
+
+        econ = rsp.getProvider();
+        return econ != null;
+    }
+
+    public static Economy getEconomy() {
+        return econ;
     }
 
     //플러그인 비활성화
@@ -256,20 +283,29 @@ public class RpgStat extends JavaPlugin implements Listener {
                 try {  //플레이어 오류검사
                     //플레이어 선언
                     Player a = Bukkit.getServer().getPlayerExact(args[1]);
+
+                    int resetPrice = getConfig().getInt("info.reset.price");
+
                     //플레이어 파일 검사
-                    if (PlayerFile.existPlayerFile(a)) {
-                        a.setLevel(0);
-                        //스텟 초기화
-                        for (String b : PlayerFile.getPlayerKeys(a)) {
-                            PlayerFile.setPlayerFile(a, b, 0);
-                        }
-                        p.sendMessage(messageHead()
-                                .append(
-                                        ComponentGenerator.text("[" + a.getName() + "] 님의 레벨(스텟)을 초기화시켰습니다 !",
-                                                NamedTextColor.WHITE)));
-                    } else {
+                    if (!PlayerFile.existPlayerFile(a) || econ.getBalance(a) < resetPrice) {
                         playerErrorMessage(p);
+                        return false;
                     }
+
+//                    a.setLevel(0);
+                    int statPoint = 0;
+                    //스텟 초기화
+                    for (String b : PlayerFile.getPlayerKeys(a)) {
+                        statPoint += (Integer) PlayerFile.getPlayerFile(a, b);
+                        PlayerFile.setPlayerFile(a, b, 0);
+                    }
+                    PlayerFile.setPlayerFile(a, "statpoint", statPoint);
+                    p.sendMessage(messageHead()
+                            .append(
+                                    ComponentGenerator.text("[" + a.getName() + "] 님의 레벨(스텟)을 초기화시켰습니다 !",
+                                            NamedTextColor.WHITE)));
+
+                    econ.withdrawPlayer(a, resetPrice);
                 } catch (NullPointerException e) {  //플레이어에 오류가 있을 때
                     playerErrorMessage(p);
                     e.printStackTrace();

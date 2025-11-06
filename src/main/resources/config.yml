@@ -9,10 +9,11 @@ info:
     color: "&e"
     lore:
       itemlore:
-        - "&f에메랄드를 소모하여"
+        - "&f코인을 소모하여"
         - "&f스탯을 &9&l초기화&r&f합니다."
         - ""
-        - "&a&l소모 : 5,000EL"
+        - "&a&l소모 : 5,000 코인"
+    price: 5000
     position: 8
     max-level: 0
 

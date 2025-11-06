@@ -34,7 +34,7 @@ public class Vitality extends Stat {
         Integer playerHealthLevel = (Integer) PlayerFile.getPlayerFile(player, STAT_NAME);
 
         double updatedHealth = BASE_HEALTH + (healthStatOption * playerHealthLevel);
-        AttributeInstance attribute = player.getAttribute(Attribute.MAX_HEALTH);
+        AttributeInstance attribute = player.getAttribute(Attribute.GENERIC_MAX_HEALTH);
 
         if (attribute != null) {
             attribute.setBaseValue(updatedHealth);
