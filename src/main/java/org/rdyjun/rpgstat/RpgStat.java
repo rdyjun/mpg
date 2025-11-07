@@ -18,11 +18,13 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockDropItemEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
@@ -137,51 +139,43 @@ public class RpgStat extends JavaPlugin implements Listener {
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
-    public void onLuck(BlockBreakEvent e) {
+    public void onLuck(BlockDropItemEvent e) {
         Player player = e.getPlayer();
 
-        Block brokenBlock = e.getBlock();
+        // 실제 드랍된 아이템 리스트 (아이템엔티티 형태)
+        List<Item> droppedEntities = e.getItems();
 
-        List<ItemStack> droppedItems = brokenBlock.getDrops()
-                .stream()
-                .filter((itemStack) -> !itemStack.getType().equals(Material.AIR))
+        if (droppedEntities.isEmpty()) {
+            return;
+        }
+
+        // 실제 아이템 스택 가져오기
+        List<ItemStack> droppedStacks = droppedEntities.stream()
+                .map(Item::getItemStack)
                 .toList();
 
-        if (droppedItems.isEmpty()) {
-            return;
-        }
+        // 첫 번째 드랍된 아이템
+        ItemStack firstDrop = droppedStacks.getFirst();
 
-        Material firstItem = droppedItems
-                .getFirst()
-                .getType();
-
+        // Silk Touch 자동 반영됨
         int stat = (Integer) PlayerFile.getPlayerFile(player, "luck");
         int amount = stat / 15 + 1;
+        double chance = getConfig().getDouble(KeyNameGenerator.getKey("luck", "chance")) * stat;
+        int random = ThreadLocalRandom.current().nextInt(100);
 
-        // 최종 확률
-        double playerChance = getConfig().getDouble(KeyNameGenerator.getKey("luck", "chance")) * stat;
-        int randomChance = ThreadLocalRandom.current().nextInt(100);
-
-        // 적용 가능한 블록이 아니거나,
-        // 첫 드랍 아이템이 부순 블록이거나(섬손)
-        // 확률 미달 시 종료
-        if (!luck.isAppliedMaterial(brokenBlock.getType()) || firstItem.equals(brokenBlock.getType())
-                || randomChance > playerChance) {
+        if (random > chance) {
             return;
         }
 
-        int lastAmount = ThreadLocalRandom.current().nextInt(amount) + 1;
-        player.sendMessage(ComponentGenerator.text(firstItem.name() + " " + lastAmount, NamedTextColor.GREEN)
-                .decorate(TextDecoration.BOLD)
-                .append(ComponentGenerator.text("개 추가 획득 !", NamedTextColor.YELLOW).decorate(TextDecoration.BOLD)));
+        int extra = ThreadLocalRandom.current().nextInt(amount) + 1;
+        ItemStack bonus = new ItemStack(firstDrop.getType(), extra);
 
-        e.getBlock().getDrops().forEach(item -> {
-            Location dropLocation = e.getBlock().getLocation();
-            ItemStack dropItem = new ItemStack(item.getType(), lastAmount);
-            e.getBlock()
-                    .getWorld()
-                    .dropItemNaturally(dropLocation, dropItem);
-        });
+        player.sendMessage(ComponentGenerator.text(
+                firstDrop.getType().name() + " " + extra + "개 추가 획득!", NamedTextColor.YELLOW));
+
+        // 실제 드랍 위치에 추가 드랍
+        Location dropLoc = e.getBlock().getLocation();
+        e.getBlock().getWorld().dropItemNaturally(dropLoc, bonus);
     }
 
     @EventHandler
