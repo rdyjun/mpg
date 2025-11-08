@@ -55,5 +55,7 @@ public class Reset implements ClickItem {
                 .append(
                         ComponentGenerator.text("[" + player.getName() + "] 님의 레벨(스텟)을 초기화시켰습니다 !",
                                 NamedTextColor.WHITE)));
+
+        rpgStat.statInitialize(player);
     }
 }

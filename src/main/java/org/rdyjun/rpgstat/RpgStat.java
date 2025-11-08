@@ -30,7 +30,6 @@ import org.bukkit.event.block.BlockDropItemEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
-import org.bukkit.event.player.PlayerEvent;
 import org.bukkit.event.player.PlayerExpChangeEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
@@ -205,26 +204,24 @@ public class RpgStat extends JavaPlugin implements Listener {
     // 플레이어가 접속했을 때 플레이어 파일 생성 및 스탯 초기화 (이미 있다면 제외)
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void joinPlayer(PlayerJoinEvent event) {
-        statInitialize(event);
+        //플레이어 파일 생성
+        PlayerFile.createFile(event.getPlayer());
+
+        Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
+            Bukkit.getScheduler().runTaskLater(this, () -> {
+                statInitialize(event.getPlayer());
+            }, 5L);
+        });
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onWorldChange(PlayerChangedWorldEvent event) {
-        statInitialize(event);
+        statInitialize(event.getPlayer());
     }
 
-    private void statInitialize(PlayerEvent event) {
-        Player player = event.getPlayer();
-
-        //플레이어 파일 생성
-        PlayerFile.createFile(player);
-
-        Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
-            Bukkit.getScheduler().runTaskLater(this, () -> {
-                agility.init(player);
-                vitality.init(player);
-            }, 5L);
-        });
+    public void statInitialize(Player player) {
+        agility.init(player);
+        vitality.init(player);
     }
 
     //스텟창 설정 ----------------------------
