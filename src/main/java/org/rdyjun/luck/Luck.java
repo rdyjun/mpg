@@ -8,9 +8,10 @@ import org.bukkit.entity.Player;
 import org.rdyjun.componentgenerator.ComponentGenerator;
 import org.rdyjun.files.PlayerFile;
 import org.rdyjun.namegenerator.KeyNameGenerator;
+import org.rdyjun.rpgstat.ClickItem;
 import org.rdyjun.rpgstat.RpgStat;
 
-public class Luck {
+public class Luck implements ClickItem {
 
     public static final String TYPE = "luck";
     private static final String STAT_NAME = "luck";
@@ -20,6 +21,10 @@ public class Luck {
 
     public Luck(RpgStat rpgStat) {
         this.rpgStat = rpgStat;
+    }
+
+    public void onClick(Player player) {
+        rpgStat.playerData.statUp(player, STAT_NAME);
     }
 
     public boolean isAppliedMaterial(Material material) {

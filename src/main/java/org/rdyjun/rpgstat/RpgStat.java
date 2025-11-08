@@ -2,9 +2,12 @@ package org.rdyjun.rpgstat;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Consumer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -23,7 +26,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockDropItemEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -44,18 +46,25 @@ import org.rdyjun.files.PlayerData;
 import org.rdyjun.files.PlayerFile;
 import org.rdyjun.luck.Luck;
 import org.rdyjun.namegenerator.KeyNameGenerator;
+import org.rdyjun.reset.Reset;
 import org.rdyjun.vitality.Vitality;
 
 
 public class RpgStat extends JavaPlugin implements Listener {
-    private static Economy econ = null;
 
+    private static final Map<Integer, Consumer<Player>> CLICKED_SLOTS = new HashMap<>();
+    private static Economy econ = null;
+    public PlayerData playerData;
     protected Agility agility;
     protected Vitality vitality;
     protected Attack attack;
     protected Luck luck;
-    private PlayerData playerData;
+    protected Reset reset;
     private ItemLore itemLore;
+
+    public static Economy getEconomy() {
+        return econ;
+    }
 
     //플러그인 활성화
     @Override
@@ -77,6 +86,13 @@ public class RpgStat extends JavaPlugin implements Listener {
         this.vitality = new Vitality(this);
         this.attack = new Attack(this);
         this.luck = new Luck(this);
+        this.reset = new Reset(this);
+
+        CLICKED_SLOTS.put(0, this.vitality::onClick);
+        CLICKED_SLOTS.put(1, this.attack::onClick);
+        CLICKED_SLOTS.put(4, this.agility::onClick);
+        CLICKED_SLOTS.put(5, this.luck::onClick);
+        CLICKED_SLOTS.put(8, this.reset::onClick);
 
         this.itemLore = new ItemLore(this);
         saveDefaultConfig();
@@ -99,10 +115,6 @@ public class RpgStat extends JavaPlugin implements Listener {
 
         econ = rsp.getProvider();
         return econ != null;
-    }
-
-    public static Economy getEconomy() {
-        return econ;
     }
 
     //플러그인 비활성화
@@ -275,31 +287,12 @@ public class RpgStat extends JavaPlugin implements Listener {
         if (args.length == 2) {  //명령어 문자를 3개만 받은 경우-----------------------
             if (args[0].equalsIgnoreCase("reset")) {
                 try {  //플레이어 오류검사
-                    //플레이어 선언
-                    Player a = Bukkit.getServer().getPlayerExact(args[1]);
-
                     int resetPrice = getConfig().getInt("info.reset.price");
 
-                    //플레이어 파일 검사
-                    if (!PlayerFile.existPlayerFile(a) || econ.getBalance(a) < resetPrice) {
-                        playerErrorMessage(p);
-                        return false;
-                    }
-
-//                    a.setLevel(0);
-                    int statPoint = 0;
-                    //스텟 초기화
-                    for (String b : PlayerFile.getPlayerKeys(a)) {
-                        statPoint += (Integer) PlayerFile.getPlayerFile(a, b);
-                        PlayerFile.setPlayerFile(a, b, 0);
-                    }
-                    PlayerFile.setPlayerFile(a, "statpoint", statPoint);
-                    p.sendMessage(messageHead()
-                            .append(
-                                    ComponentGenerator.text("[" + a.getName() + "] 님의 레벨(스텟)을 초기화시켰습니다 !",
-                                            NamedTextColor.WHITE)));
-
-                    econ.withdrawPlayer(a, resetPrice);
+                    //플레이어 선언
+                    Player targetPlayer = Bukkit.getServer()
+                            .getPlayerExact(args[1]);
+                    reset.reset(targetPlayer);
                 } catch (NullPointerException e) {  //플레이어에 오류가 있을 때
                     playerErrorMessage(p);
                     e.printStackTrace();
@@ -369,37 +362,15 @@ public class RpgStat extends JavaPlugin implements Listener {
         }
         //클릭한 아이템에 따른 작동
         event.setCancelled(true);
+        player.openInventory(inv(player));
 
-        Component eventComponent = event.getCurrentItem()
-                .getItemMeta()
-                .displayName();
-
-        String eventName = PlainTextComponentSerializer.plainText().serialize(eventComponent);
-
-        for (String statName : getConfig().getConfigurationSection("stats").getKeys(false)) {
-            String displayName = getConfig().getString("stats." + statName + ".name");
-
-            if (!eventName.contains(displayName)) {
-                continue;
-            }
-
-            boolean isFailed = !playerData.statUp(player, statName);
-            player.openInventory(inv(player));
-
-            if (isFailed) {
-                return;
-            }
-
-            player.openInventory(inv(player));
-
-            if (statName.contains("agility")) {
-                agility.increase(player);
-            }
-
-            if (statName.contains("vitality")) {
-                vitality.increase(player);
-            }
+        int slot = event.getSlot();
+        Consumer<Player> execute = CLICKED_SLOTS.getOrDefault(slot, null);
+        if (execute == null) {
+            return;
         }
+
+        execute.accept(player);
     }
 
     @EventHandler

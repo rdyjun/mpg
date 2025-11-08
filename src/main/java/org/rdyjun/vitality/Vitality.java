@@ -3,20 +3,18 @@ package org.rdyjun.vitality;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import org.bukkit.Bukkit;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.player.PlayerRespawnEvent;
 import org.rdyjun.componentgenerator.ComponentGenerator;
 import org.rdyjun.files.PlayerFile;
 import org.rdyjun.namegenerator.KeyNameGenerator;
+import org.rdyjun.rpgstat.ClickItem;
 import org.rdyjun.rpgstat.RpgStat;
 import org.rdyjun.rpgstat.Stat;
 
 
-public class Vitality extends Stat {
+public class Vitality extends Stat implements ClickItem {
 
     public static final String TYPE = "vitality";
     private static final Double BASE_HEALTH = 20d;
@@ -25,6 +23,11 @@ public class Vitality extends Stat {
 
     public Vitality(RpgStat rpgStat) {
         super(rpgStat);
+    }
+
+    public void onClick(Player player) {
+        rpgStat.playerData.statUp(player, STAT_NAME);
+        increase(player);
     }
 
     public void increase(Player player) {

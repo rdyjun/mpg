@@ -7,10 +7,11 @@ import org.bukkit.entity.Player;
 import org.rdyjun.componentgenerator.ComponentGenerator;
 import org.rdyjun.files.PlayerFile;
 import org.rdyjun.namegenerator.KeyNameGenerator;
+import org.rdyjun.rpgstat.ClickItem;
 import org.rdyjun.rpgstat.RpgStat;
 import org.rdyjun.rpgstat.Stat;
 
-public class Agility extends Stat {
+public class Agility extends Stat implements ClickItem {
 
     public static final String TYPE = "agility";
     private static final Float DEFAULT_SPEED = 0.2f;
@@ -19,6 +20,11 @@ public class Agility extends Stat {
 
     public Agility(RpgStat rpgStat) {
         super(rpgStat);
+    }
+
+    public void onClick(Player player) {
+        rpgStat.playerData.statUp(player, STAT_NAME);
+        increase(player);
     }
 
     public void increase(Player player) {
@@ -31,7 +37,6 @@ public class Agility extends Stat {
         float updatedSpeed = Math.min(1f, DEFAULT_SPEED + (playerAgilityLevel * agilityStatOption));
 
         player.setWalkSpeed(updatedSpeed);
-//        player.setFlySpeed(updatedSpeed);
     }
 
     public void init(Player player) {

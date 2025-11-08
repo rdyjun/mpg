@@ -7,9 +7,10 @@ import org.bukkit.entity.Player;
 import org.rdyjun.componentgenerator.ComponentGenerator;
 import org.rdyjun.files.PlayerFile;
 import org.rdyjun.namegenerator.KeyNameGenerator;
+import org.rdyjun.rpgstat.ClickItem;
 import org.rdyjun.rpgstat.RpgStat;
 
-public class Attack {
+public class Attack implements ClickItem {
 
     public static final String TYPE = "attack";
     private static final String STAT_NAME = "attack";
@@ -19,6 +20,10 @@ public class Attack {
 
     public Attack(RpgStat rpgStat) {
         this.rpgStat = rpgStat;
+    }
+
+    public void onClick(Player player) {
+        rpgStat.playerData.statUp(player, STAT_NAME);
     }
 
     public double getAdditionalDamage(Player player) {
