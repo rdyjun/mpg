@@ -154,7 +154,7 @@ public class RpgStat extends JavaPlugin implements Listener {
         if (!luck.isAppliedMaterial(e.getBlock().getType())) {
             return;
         }
-        
+
         Player player = e.getPlayer();
 
         // 실제 드랍된 아이템 리스트 (아이템엔티티 형태)
@@ -363,7 +363,6 @@ public class RpgStat extends JavaPlugin implements Listener {
         }
         //클릭한 아이템에 따른 작동
         event.setCancelled(true);
-        player.openInventory(inv(player));
 
         int slot = event.getSlot();
         Consumer<Player> execute = CLICKED_SLOTS.getOrDefault(slot, null);
@@ -372,6 +371,7 @@ public class RpgStat extends JavaPlugin implements Listener {
         }
 
         execute.accept(player);
+        player.openInventory(inv(player));
     }
 
     @EventHandler
