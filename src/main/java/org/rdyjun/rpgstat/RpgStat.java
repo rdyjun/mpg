@@ -87,8 +87,8 @@ public class RpgStat extends JavaPlugin implements Listener {
         this.luck = new Luck(this);
         this.reset = new Reset(this);
 
-        CLICKED_SLOTS.put(0, this.vitality::onClick);
-        CLICKED_SLOTS.put(1, this.attack::onClick);
+        CLICKED_SLOTS.put(1, this.vitality::onClick);
+        CLICKED_SLOTS.put(2, this.attack::onClick);
         CLICKED_SLOTS.put(4, this.agility::onClick);
         CLICKED_SLOTS.put(5, this.luck::onClick);
         CLICKED_SLOTS.put(8, this.reset::onClick);
