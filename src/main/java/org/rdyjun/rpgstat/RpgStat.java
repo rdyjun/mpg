@@ -151,6 +151,10 @@ public class RpgStat extends JavaPlugin implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onLuck(BlockDropItemEvent e) {
+        if (!luck.isAppliedMaterial(e.getBlock().getType())) {
+            return;
+        }
+        
         Player player = e.getPlayer();
 
         // 실제 드랍된 아이템 리스트 (아이템엔티티 형태)
