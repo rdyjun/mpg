@@ -184,6 +184,8 @@ public class RpgStat extends JavaPlugin implements Listener {
 
         int extra = ThreadLocalRandom.current().nextInt(amount) + 1;
         ItemStack bonus = new ItemStack(firstDrop.getType(), extra);
+        System.out.println(
+                player.getName() + "님이 행운 스탯으로 " + firstDrop.getType().name() + " " + extra + "개를 추가 획득했습니다.");
 
         player.sendMessage(ComponentGenerator.text(
                 firstDrop.getType().name() + " " + extra + "개 추가 획득!", NamedTextColor.YELLOW));
