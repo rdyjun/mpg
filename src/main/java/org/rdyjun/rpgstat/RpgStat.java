@@ -16,6 +16,7 @@ import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -28,6 +29,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockDropItemEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerExpChangeEvent;
@@ -123,6 +125,28 @@ public class RpgStat extends JavaPlugin implements Listener {
         saveConfig();
     }
 
+    @EventHandler
+    public void onFoodLevelChange(FoodLevelChangeEvent event) {
+        if (!(event.getEntity() instanceof Player player)) {
+            return;
+        }
+
+        int oldLevel = player.getFoodLevel();
+        int newLevel = event.getFoodLevel();
+
+        // 허기가 줄어들 때만 반응
+        if (newLevel < oldLevel) {
+            double maxHealth = player.getAttribute(Attribute.GENERIC_MAX_HEALTH).getBaseValue();
+            double scale = 20.0 / maxHealth; // 체력 많을수록 허기 감소 느리게
+            double chance = Math.random();
+
+            // 예: 체력이 40이면 절반 확률로 허기 감소 무시
+            if (chance > scale) {
+                event.setCancelled(true);
+            }
+        }
+    }
+
     //레벨업 했을 때
     @EventHandler
     public void onLevelUp(PlayerExpChangeEvent e) throws IOException {
@@ -149,9 +173,10 @@ public class RpgStat extends JavaPlugin implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onLuck(BlockDropItemEvent e) {
-        if (!luck.isAppliedMaterial(e.getBlock().getType())) {
+        Material blockType = e.getBlockState().getType();
+        if (!luck.isAppliedMaterial(blockType)) {
             return;
         }
 
@@ -171,8 +196,10 @@ public class RpgStat extends JavaPlugin implements Listener {
 
         // 첫 번째 드랍된 아이템
         ItemStack firstDrop = droppedStacks.getFirst();
+        if (firstDrop.getType() == blockType) {
+            return;
+        }
 
-        // Silk Touch 자동 반영됨
         int stat = (Integer) PlayerFile.getPlayerFile(player, "luck");
         int amount = stat / 15 + 1;
         double chance = getConfig().getDouble(KeyNameGenerator.getKey("luck", "chance")) * stat;
